@@ -1,0 +1,6 @@
+{
+  "name": "Association Malagasy Miray",
+  "description": "Public Institutional Website and Secure Access Portal for Association Malagasy Miray (AMM)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
