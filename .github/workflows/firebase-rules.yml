@@ -1,0 +1,62 @@
+name: Firebase Realtime DB Rules - Emulator Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-rules:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_PROJECT_ID: site-amm-test
+      FIREBASE_EMULATOR_HOST: 127.0.0.1
+      FIREBASE_DATABASE_EMULATOR_HOST: 127.0.0.1:9000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install --no-audit --no-fund
+
+      - name: Start Firebase Realtime Database emulator
+        run: |
+          set -e
+          npx firebase emulators:start --only database --project ${{ env.FIREBASE_PROJECT_ID }} &
+          for i in {1..30}; do
+            if nc -z 127.0.0.1 9000 >/dev/null 2>&1; then
+              echo "Emulator is listening"
+              break
+            fi
+            echo "Waiting for emulator... ($i)"
+            sleep 1
+          done
+          if ! nc -z 127.0.0.1 9000 >/dev/null 2>&1; then
+            echo "Firebase emulator did not start on port 9000" >&2
+            exit 1
+          fi
+
+      - name: Run TypeScript typecheck
+        run: |
+          npm run typecheck
+
+      - name: Run security rules tests
+        run: |
+          npm run test:rules
+        env:
+          FIREBASE_DATABASE_EMULATOR_HOST: 127.0.0.1:9000
+
+      - name: Stop emulators
+        if: always()
+        run: |
+          pids=$(ps aux | grep 'firebase emulators:start' | grep -v grep | awk '{print $2}') || true
+          if [ -n "$pids" ]; then
+            kill $pids || true
+          fi

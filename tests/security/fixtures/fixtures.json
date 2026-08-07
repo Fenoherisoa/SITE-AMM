@@ -1,0 +1,35 @@
+{
+  "users": {
+    "memberUid": {"role":"MEMBER","permissions":{},"linkedEmployeeId":null,"accountStatus":"ACTIVE"},
+    "hrUid": {"role":"RH","permissions":{"rh.read":true,"rh.update":true},"linkedEmployeeId":null,"accountStatus":"ACTIVE"},
+    "payrollUid": {"role":"PAYROLL","permissions":{"payroll.read":true,"payroll.manage":true},"accountStatus":"ACTIVE"},
+    "financeUid": {"role":"FINANCE","permissions":{"finance.read":true,"finance.manage":true},"accountStatus":"ACTIVE"},
+    "adminUid": {"role":"ADMIN","permissions":{"users.manage":true,"settings.manage":true},"accountStatus":"ACTIVE"},
+    "superUid": {"role":"SUPER_ADMIN","permissions":{"audit.read":true},"accountStatus":"ACTIVE"},
+    "suspendedUid": {"role":"MEMBER","accountStatus":"SUSPENDED"},
+    "disabledUid": {"role":"MEMBER","accountStatus":"DISABLED"},
+    "legacyPwdUid": {"role":"MEMBER","password":"fake-legacy-password","accountStatus":"PENDING"}
+  },
+  "employees": {
+    "EMP-001": {"matricule":"EMP-001","cin":"safe","cin_recto":"safe","cin_verso":"safe"},
+    "EMP-002": {"matricule":"EMP-002"}
+  },
+  "attendance": {
+    "att1": {"employeeId":"EMP-001","date":"2026-01-01"}
+  },
+  "token_pool": {
+    "t1": {"token_miasa":"fake-token"}
+  },
+  "logs": {
+    "log1": {"action":"created","by":"adminUid"}
+  },
+  "messages": {
+    "conv1": {"participants": {"memberUid": true, "hrUid": true}, "messages": {"m1": {"author":"memberUid","text":"hi"}}},
+    "conv_private": {"participants": {"memberUid": true}, "messages": {"m2": {"author":"memberUid","text":"secret"}}}
+  },
+  "pendingRequests": {
+    "pr1": {"applicantUid":"anon","password":"fake"}
+  },
+  "parametres": {"siteName":"AMM Test"},
+  "metadata": {"version":"v1"}
+}

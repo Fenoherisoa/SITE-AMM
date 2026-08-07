@@ -1,0 +1,33 @@
+{
+  "name": "site-amm",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:rules && jest --runInBand --testPathPatterns=src/**tests**/security-remediation.test.ts",
+    "test:rules": "mocha tests/security/**/*.test.js --timeout 20000",
+    "test:security": "jest --runInBand --testPathPatterns=src/**tests**/security-remediation.test.ts"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "firebase": "^12.0.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "chai": "^4.3.7",
+    "firebase-tools": "15.26.0",
+    "jest": "^30.4.2",
+    "mocha": "^10.2.0",
+    "ts-jest": "^29.4.12",
+    "typescript": "^5.0.0"
+  }
+}
