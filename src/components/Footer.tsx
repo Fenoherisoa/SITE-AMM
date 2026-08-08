@@ -1,13 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageRoute } from '../types';
 import { Shield, Lock, MapPin, Mail, Phone, ExternalLink } from 'lucide-react';
-import { ORGANIZATION_INFO } from '../data/mockData';
+import { ref, onValue } from 'firebase/database';
+import { getFirebaseDatabase } from '../services/firebase';
 
 interface FooterProps {
   onNavigate: (route: PageRoute) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+
+  const [info, setInfo] = useState({
+    description: "Loading...",
+    ideologie: "...",
+    lieu: "...",
+    siege_social: "...",
+    email: "...",
+    telephone: "..."
+  });
+
+  const [social, setSocial] = useState({
+    facebook: '',
+    instagram: '',
+    youtube: '',
+    twitter: ''
+  });
+
+  useEffect(() => {
+    try {
+      const db = getFirebaseDatabase();
+      const infoRef = ref(db, 'parametres');
+
+      const unsubscribe = onValue(
+        infoRef,
+        (snapshot) => {
+          const data = snapshot.val();
+
+          if (data) {
+            setInfo({
+              description: data.description ?? '',
+              ideologie: data.ideologie ?? '',
+              lieu: data.lieu ?? '',
+              siege_social: data.siege_social ?? '',
+              email: data.email ?? '',
+              telephone: data.telephone ?? '',
+            });
+          }
+        },
+        (error) => {
+          console.error(
+            '[Footer] Erreur Firebase Database:',
+            error
+          );
+        }
+      );
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error(
+        '[Footer] Firebase Database indisponible:',
+        error
+      );
+    }
+  }, []);
+
   return (
     <footer className="bg-[#1A202C] text-gray-300 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -24,12 +80,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </span>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed font-normal">
-              {ORGANIZATION_INFO.description}
+              {info.description}
             </p>
             <div className="pt-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#007E3A]/20 text-emerald-400 border border-[#007E3A]/40">
                 <Shield className="w-3.5 h-3.5" />
-                {ORGANIZATION_INFO.slogan}
+                {info.ideologie}
               </span>
             </div>
           </div>
@@ -109,15 +165,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-3 text-sm text-gray-400">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#007E3A] shrink-0 mt-0.5" />
-                <span>{ORGANIZATION_INFO.addressPlaceholder}</span>
+                <span>{info.siege_social} {info.lieu}</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-[#007E3A] shrink-0" />
-                <span>{ORGANIZATION_INFO.emailPlaceholder}</span>
+                <span>{info.email}</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#007E3A] shrink-0" />
-                <span>{ORGANIZATION_INFO.phonePlaceholder}</span>
+                <span>{info.telephone}</span>
               </li>
             </ul>
           </div>

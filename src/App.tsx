@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { PageRoute, UserMetadata } from './types';
 import { authService } from './services/authService';
+import { FirebaseService } from './services/firebaseService'; // Ahitsio ny lalana raha ilaina
 
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { DashboardMenu } from './components/DashboardMenu';
+import OverviewDashboard from './gestion_membre/OverviewDashboard'; // Ahitsio ny lalan'ny dossier raha ilaina
 
 import { HomeView } from './views/HomeView';
 import { AboutView } from './views/AboutView';
@@ -27,6 +30,18 @@ import { AccessDeniedView } from './views/AccessDeniedView';
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<PageRoute>('home');
   const [currentUser, setCurrentUser] = useState<UserMetadata | null>(authService.getCurrentUser());
+  
+  // Fanjakana hitazona an'ilay module voafidy ao anatin'ny espace
+  const [activeModule, setActiveModule] = useState<string | null>(null);
+  const [currentTab, setCurrentTab] = useState<string>('overview'); // Ampio ity state ity
+
+  // Fanjakana fitehirizana ny données avy any Firebase
+  const [members, setMembers] = useState<any[]>([]);
+  const [enquetes, setEnquetes] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loadingData, setLoadingData] = useState<boolean>(false);
 
   useEffect(() => {
     // Subscribe to Auth state updates
@@ -36,13 +51,45 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Fakana ny données avy ao Firebase rehefa misafidy 'members' na module mitovy aminy ianao
+  // Fakana ny données avy ao Firebase rehefa misafidy 'members' na 'adhesion'
+  useEffect(() => {
+    if (activeModule === 'members' || activeModule === 'adhesion') {
+      const fetchData = async () => {
+        setLoadingData(true);
+        try {
+          const [memData, enqData, accData, logData, evData] = await Promise.all([
+            FirebaseService.getMembers(),
+            FirebaseService.getEnquetes(),
+            FirebaseService.getAccounting(),
+            FirebaseService.getLogs(),
+            FirebaseService.getEvents()
+          ]);
+          setMembers(memData);
+          setEnquetes(enqData);
+          setTransactions(accData);
+          setLogs(logData);
+          setEvents(evData);
+        } catch (error) {
+          console.error("Erreur lors du chargement des données depuis Firebase:", error);
+        } finally {
+          setLoadingData(false);
+        }
+      };
+
+      fetchData();
+    }
+  }, [activeModule]);
+
   const handleNavigate = (route: PageRoute) => {
     setCurrentRoute(route);
+    setActiveModule(null); // Famerenana azy ho null raha miala amin'ny espace
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSignOut = async () => {
     await authService.signOut();
+    setActiveModule(null);
     setCurrentRoute('home');
   };
 
@@ -108,11 +155,50 @@ export default function App() {
             />
           );
         }
+
+        // 1. Raha misy module voafidy
+        if (activeModule === 'members' || activeModule === 'adhesion') {
+          return (
+            <div>
+              <div className="max-w-7xl mx-auto px-6 pt-4">
+                <button
+                  onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                >
+                  ← Retour au Menu Principal
+                </button>
+              </div>
+
+              {loadingData ? (
+                <div className="flex justify-center items-center py-20">
+                  <div className="text-slate-600 font-medium animate-pulse">Chargement...</div>
+                </div>
+              ) : (
+                <OverviewDashboard
+                  allMembers={members}
+                  allEnquetes={enquetes}
+                  allTransactions={transactions}
+                  logs={logs}
+                  events={events}
+                  currentTab={currentTab} // Ampifandraiso amin'ny state
+                  setCurrentTab={(tab) => {
+                    console.log("Tab voafidy:", tab);
+                    setCurrentTab(tab); // Nohavaozina ny tab
+                  }}
+                />
+              )}
+            </div>
+          );
+        }
+
+        // 2. Raha mbola tsy misy dia ny DashboardMenu no aseho
         return (
-          <EspaceMemberView
-            currentUser={currentUser}
-            onNavigate={handleNavigate}
-            onSignOut={handleSignOut}
+          <DashboardMenu
+            user={currentUser}
+            onSelectModule={(moduleKey) => {
+              console.log("Module sélectionné :", moduleKey);
+              setActiveModule(moduleKey); // Mametraka ilay module ho mavitrika
+            }}
           />
         );
 
