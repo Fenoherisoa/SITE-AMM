@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   BarChart2, UserPlus, FileText, CheckSquare, Landmark, 
-  Terminal, ShieldCheck, Mail, Calendar, Settings, LogOut, X, Clock, UserCheck
+  Terminal, ShieldCheck, Mail, Calendar, Settings, LogOut, X, Clock, HelpCircle
 } from 'lucide-react';
 
 interface Props {
@@ -30,63 +30,42 @@ export default function Sidebar({
   if (!isSidebarOpen) return null;
 
   const menuItems = [
-    { id: "overview", label: "Overview", icon: BarChart2, perm: userPermissions.overview ?? true },
-    { id: "adhesion", label: "Adhésion", icon: UserPlus, perm: userPermissions.adhesion ?? true },
-    { id: "members", label: "Membres", icon: FileText, perm: userPermissions.members ?? true },
-    { id: "enquetes", label: "Enquêtes", icon: CheckSquare, perm: userPermissions.enquetes ?? true },
-    { id: "accounting", label: "Comptabilité", icon: Landmark, perm: userPermissions.accounting ?? true },
-    { id: "operations", label: "Opérations", icon: Clock, perm: userPermissions.operations ?? true },
-    { id: "historiquetrans", label: "Transactions", icon: HistoryIcon, perm: userPermissions.historiquetrans ?? true },
-    { id: "historique", label: "Logs", icon: Terminal, perm: userPermissions.historique ?? true },
-    { id: "calendar", label: "Calendrier", icon: Calendar, perm: userPermissions.calendar ?? true },
-    { id: "messenger", label: "Messenger", icon: Mail, perm: userPermissions.messenger ?? true, badge: unreadCount },
-    { id: "security", label: "Sécurité", icon: ShieldCheck, perm: userPermissions.security ?? true },
-    { id: "parametre", label: "Paramètres", icon: Settings, perm: userPermissions.parametre ?? true }
+    { id: "overview", label: "Overview", icon: BarChart2, perm: userPermissions.overview },
+    { id: "adhesion", label: "Adhésion", icon: UserPlus, perm: userPermissions.adhesion },
+    { id: "members", label: "Membres", icon: FileText, perm: userPermissions.members },
+    { id: "enquetes", label: "Enquêtes", icon: CheckSquare, perm: userPermissions.enquetes },
+    { id: "accounting", label: "Comptabilité", icon: Landmark, perm: userPermissions.accounting },
+    { id: "operations", label: "Opérations", icon: Clock, perm: userPermissions.operations },
+    { id: "historiquetrans", label: "Transactions", icon: HistoryIcon, perm: userPermissions.historiquetrans || true },
+    { id: "historique", label: "Logs", icon: Terminal, perm: userPermissions.historique },
+    { id: "calendar", label: "Calendrier", icon: Calendar, perm: userPermissions.calendar },
+    { id: "messenger", label: "Messenger", icon: Mail, perm: userPermissions.messenger, badge: unreadCount },
+    { id: "security", label: "Sécurité", icon: ShieldCheck, perm: userPermissions.security },
+    { id: "parametre", label: "Paramètres", icon: Settings, perm: userPermissions.parametre }
   ];
-
-  const isAdmin = currentUserRole?.toUpperCase() === 'ADMIN' || currentUserRole?.toUpperCase() === 'ADMINISTRATEUR';
 
   return (
     <div className="fixed inset-y-0 left-0 w-64 bg-slate-900 flex flex-col justify-between z-50 shadow-xl border-r border-slate-800 transition-all font-sans">
       {/* Header */}
       <div className="p-5 border-b border-slate-800">
         <div className="flex items-center justify-between mb-4">
-          <button 
-            onClick={() => setIsSidebarOpen(false)} 
-            className="text-slate-400 hover:text-white cursor-pointer transition-colors"
-          >
+          <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white cursor-pointer transition-colors">
             <X className="h-6 w-6" />
           </button>
-          <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full uppercase flex items-center gap-1 ${
-            isAdmin ? 'bg-amber-500 text-slate-950' : 'bg-indigo-600 text-white'
-          }`}>
-            <UserCheck className="h-3.5 w-3.5" />
-            {currentUserRole || 'Utilisateur'}
+          <span className="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase">
+            {currentUserRole}
           </span>
         </div>
-        
         <h2 className="text-white text-lg font-bold tracking-tight text-center">AMM CONNECT</h2>
-        
-        <div className="mt-3 p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Mpandray anjara (Connecté)</p>
-          <p className="text-white text-sm font-extrabold mt-0.5 truncate" title={loginUser}>
-            {loginUser || 'Tsy fantatra'}
-          </p>
-          <span className="inline-block mt-1 text-[10px] font-mono text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-800/50">
-            {isAdmin ? 'Privilèges Administrator' : 'Accès Membre'}
-          </span>
-        </div>
+        <p className="text-slate-400 text-xs text-center mt-1 truncate">User: {loginUser}</p>
       </div>
 
       {/* Menu List */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {menuItems.map((item) => {
-          // Raha toa ka tsy tafiditra ao amin'ny permission dia tsakitsakyina fa raha misy kosa dia aseho
-          if (item.perm === false) return null;
-          
+          if (!item.perm) return null;
           const Icon = item.icon;
           const active = currentTab === item.id;
-          
           return (
             <button
               key={item.id}
@@ -128,6 +107,7 @@ export default function Sidebar({
   );
 }
 
+// Inline fallback for History Icon to keep it fully self-contained and bullet-proof
 function HistoryIcon(props: any) {
   return (
     <svg

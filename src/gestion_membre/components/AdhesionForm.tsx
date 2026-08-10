@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Phone, FileText, Calendar, Mail, Map, MapPin } from 'lucide-react';
-import { madagascarData } from '../data/madagascarData';
-import { PROJECT_PREFIX } from './constants';
+import { madagascarData } from '../madagascarData';
+import { PROJECT_PREFIX } from '../constants';
 
 interface Props {
   isEditMode: boolean;

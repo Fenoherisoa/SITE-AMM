@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { PageRoute, UserMetadata } from './types';
+// Ampio ity import ity eo an-tampon'ny App.tsx lehibe
+import { BrowserRouter } from 'react-router-dom';
+import MembersAppModule from './gestion_membre/MembersAppModule';
+import RHAppModule from './RHAppModule'; // Ilay natao tamin'ny Dingana 1
+import { AuthProvider } from './RH/contexts/AuthContext';
+
+
 import { authService } from './services/authService';
 import { FirebaseService } from './services/firebaseService'; // Ahitsio ny lalana raha ilaina
 
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { DashboardMenu } from './components/DashboardMenu';
-import OverviewDashboard from './gestion_membre/OverviewDashboard'; // Ahitsio ny lalan'ny dossier raha ilaina
+
 
 import { HomeView } from './views/HomeView';
 import { AboutView } from './views/AboutView';
@@ -141,6 +148,7 @@ export default function App() {
           return <LoginView onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
         }
         return <ChangePasswordView onNavigate={handleNavigate} />;
+        
 
       case 'espace':
         if (!currentUser) {
@@ -157,37 +165,50 @@ export default function App() {
         }
 
         // 1. Raha misy module voafidy
-        if (activeModule === 'members' || activeModule === 'adhesion') {
+        if (activeModule === 'members' || activeModule === 'adhesion' || activeModule === 'hr') {
           return (
-            <div>
-              <div className="max-w-7xl mx-auto px-6 pt-4">
-                <button
-                  onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
-                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
-                >
-                  ← Retour au Menu Principal
-                </button>
-              </div>
+            <BrowserRouter>
+              <AuthProvider>
+                <div className="w-full">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                    <button
+                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                    >
+                      ← Retour au Menu Principal du Site
+                    </button>
+                  </div>
 
-              {loadingData ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="text-slate-600 font-medium animate-pulse">Chargement...</div>
+                  {activeModule === 'hr' ? (
+                    <RHAppModule />
+                  ) : (
+                    <MembersAppModule />
+                  )}
                 </div>
-              ) : (
-                <OverviewDashboard
-                  allMembers={members}
-                  allEnquetes={enquetes}
-                  allTransactions={transactions}
-                  logs={logs}
-                  events={events}
-                  currentTab={currentTab} // Ampifandraiso amin'ny state
-                  setCurrentTab={(tab) => {
-                    console.log("Tab voafidy:", tab);
-                    setCurrentTab(tab); // Nohavaozina ny tab
-                  }}
-                />
-              )}
-            </div>
+              </AuthProvider>
+            </BrowserRouter>
+          );
+        }
+
+        // Raha misy module voafidy (hr na members)
+        if (activeModule === 'hr' || activeModule === 'members') {
+          return (
+            <BrowserRouter>
+              <AuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+                <div className="w-full">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                    <button
+                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                    >
+                      ← Retour au Menu Principal du Site
+                    </button>
+                  </div>
+
+                  <RHAppModule />
+                </div>
+              </AuthProvider>
+            </BrowserRouter>
           );
         }
 
