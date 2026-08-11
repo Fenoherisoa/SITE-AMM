@@ -13,13 +13,14 @@ const baseNavItems = [
   { to: '/accounting', label: 'Comptabilité', permission: 'accounting' },
   { to: '/users', label: 'Utilisateurs', permission: 'security' },
   { to: '/settings', label: 'Paramètres', permission: 'parametre' },
+  { to: '/apropos', label: 'A propos', permission: 'apropos' },
 ]
 
 export const Layout = () => {
   const { user, signOut, permissions } = useAuth()
 
   const navItems = baseNavItems.filter((item) => {
-    if (item.to === '/') return true
+    if (item.to === '/'|| item.to === '/apropos') return true
     return Boolean(permissions[item.permission])
   })
 

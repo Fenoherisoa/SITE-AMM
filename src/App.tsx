@@ -3,7 +3,7 @@ import { PageRoute, UserMetadata } from './types';
 // Ampio ity import ity eo an-tampon'ny App.tsx lehibe
 import { BrowserRouter } from 'react-router-dom';
 import MembersAppModule from './gestion_membre/MembersAppModule';
-import RHAppModule from './RHAppModule'; // Ilay natao tamin'ny Dingana 1
+import RHAppModule from './RH/RHAppModule'; // Ilay natao tamin'ny Dingana 1
 import { AuthProvider } from './RH/contexts/AuthContext';
 
 

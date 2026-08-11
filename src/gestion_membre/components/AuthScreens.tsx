@@ -69,8 +69,8 @@ export default function AuthScreens({
       {authScreen === "login" && (
         <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-100 animate-fade-in-up">
           <img src={logo} className="w-20 h-20 mx-auto mb-4 object-contain" alt="Logo" />
-          <h2 className="text-xl font-extrabold text-slate-900 text-center tracking-tight uppercase">AMM CONNECT</h2>
-          <p className="text-slate-400 text-xs text-center mt-1 uppercase tracking-wider font-semibold">Web ERP Portal</p>
+          <h2 className="text-xl font-extrabold text-slate-900 text-center tracking-tight uppercase">GESTION DU MEMBRE</h2>
+          <p className="text-slate-400 text-xs text-center mt-1 uppercase tracking-wider font-semibold">ASSOCIATION MALAGASY MIRAY</p>
           
           <div className="mt-6 space-y-4">
             <div>

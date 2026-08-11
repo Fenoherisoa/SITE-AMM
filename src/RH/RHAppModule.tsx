@@ -1,21 +1,22 @@
 // src/RHAppModule.tsx
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { Layout } from './RH/components/Layout' 
-import { ProtectedRoute } from './RH/components/ProtectedRoute'
-import { DashboardPage } from './RH/pages/DashboardPage'
-import { EmployeesPage } from './RH/pages/EmployeesPage'
-import { DepartmentsPage } from './RH/pages/DepartmentsPage'
-import { PositionsPage } from './RH/pages/PositionsPage'
-import { AttendancePage } from './RH/pages/AttendancePage'
-import { LeavePage } from './RH/pages/LeavePage'
-import { PayrollPage } from './RH/pages/PayrollPage'
-import { UsersPage } from './RH/pages/UsersPage'
-import { EmployeeDetailPage } from './RH/pages/EmployeeDetailPage'
-import { SettingsPage } from './RH/pages/SettingsPage'
-import { RHPage } from './RH/pages/RHPage'
-import { AccountingPage } from './RH/pages/AccountingPage'
+import { Layout } from './components/Layout' 
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { DashboardPage } from './pages/DashboardPage'
+import { EmployeesPage } from './pages/EmployeesPage'
+import { DepartmentsPage } from './pages/DepartmentsPage'
+import { PositionsPage } from './pages/PositionsPage'
+import { AttendancePage } from './pages/AttendancePage'
+import { LeavePage } from './pages/LeavePage'
+import { PayrollPage } from './pages/PayrollPage'
+import { UsersPage } from './pages/UsersPage'
+import { EmployeeDetailPage } from './pages/EmployeeDetailPage'
+import { SettingsPage } from './pages/SettingsPage'
+import { RHPage } from './pages/RHPage'
+import { AccountingPage } from './pages/AccountingPage'
+import { AproposPage } from './pages/AproposPage'
 // Ampidiro eto ny pejinao ho an'ny Login (Ovay ny path raha ilaina)
-import { LoginPage } from './RH/pages/LoginPage' 
+import { LoginPage } from './pages/LoginPage' 
 
 export default function RHAppModule() {
   return (
@@ -54,6 +55,10 @@ export default function RHAppModule() {
           
           <Route element={<ProtectedRoute requiredPermissions={['parametre']} />}>
             <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute requiredPermissions={['apropos']} />}>
+            <Route path="/apropos" element={<AproposPage />} />
           </Route>
         </Route>
       </Route>

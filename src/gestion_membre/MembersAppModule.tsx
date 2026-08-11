@@ -1208,7 +1208,7 @@ export default function MembersAppModule() {
 
   // 2. Raha mbola "Loading" ny splash
   if (isSplash) {
-    return <SplashScreen />;
+    return <AuthScreens/>;
   }
 
   // --- RENDERING VIEWS CORRUPTER COMPOSERS ---

@@ -58,3 +58,14 @@ export const addTransaction = async (transaction: Omit<AccountingTransaction, 'i
   await set(accountRef, nextAccount)
   return payload
 }
+
+// Ao amin'ny src/RH/services/accountingService.ts
+export const getTransactions = async () => {
+  // Ampio eto ny fakana ny data raha misy API na mbola mampiasa localStorage
+  const saved = localStorage.getItem('pcg_accounting_journal')
+  return saved ? JSON.parse(saved) : []
+}
+
+export const saveTransactions = async (transactions: any[]) => {
+  localStorage.setItem('pcg_accounting_journal', JSON.stringify(transactions))
+}
