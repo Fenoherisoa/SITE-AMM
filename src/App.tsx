@@ -3,8 +3,16 @@ import { PageRoute, UserMetadata } from './types';
 // Ampio ity import ity eo an-tampon'ny App.tsx lehibe
 import { BrowserRouter } from 'react-router-dom';
 import MembersAppModule from './gestion_membre/MembersAppModule';
+import Moduleconge from './conge/Moduleconge';
 import RHAppModule from './RH/RHAppModule'; // Ilay natao tamin'ny Dingana 1
-import { AuthProvider } from './RH/contexts/AuthContext';
+import LogModuleApp from './gestion_logistique/LogModuleApp'; 
+import AccountModuleApp from './Mon_compte/AccountModuleApp'; 
+import ComptabiliteModuleApp from './comptabilite/ComptabiliteModuleApp'; 
+// Ampidiro miaraka amin'ny anarana samihafa izy ireo:
+import { AuthProvider as RHAuthProvider } from './RH/contexts/AuthContext';
+import { AuthProvider as CongeAuthProvider } from './conge/context/AuthContext';
+import { AuthProvider as LogAuthProvider } from './gestion_logistique/context/AuthContext';
+import { AuthProvider as CptAuthProvider } from './comptabilite/context/AuthContext';
 
 
 import { authService } from './services/authService';
@@ -168,7 +176,7 @@ export default function App() {
         if (activeModule === 'members' || activeModule === 'adhesion' || activeModule === 'hr') {
           return (
             <BrowserRouter>
-              <AuthProvider>
+              <RHAuthProvider>
                 <div className="w-full">
                   <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
                     <button
@@ -185,7 +193,7 @@ export default function App() {
                     <MembersAppModule />
                   )}
                 </div>
-              </AuthProvider>
+              </RHAuthProvider>
             </BrowserRouter>
           );
         }
@@ -194,7 +202,7 @@ export default function App() {
         if (activeModule === 'hr' || activeModule === 'members') {
           return (
             <BrowserRouter>
-              <AuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+              <RHAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
                 <div className="w-full">
                   <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
                     <button
@@ -207,7 +215,89 @@ export default function App() {
 
                   <RHAppModule />
                 </div>
-              </AuthProvider>
+              </RHAuthProvider>
+            </BrowserRouter>
+          );
+        }
+
+        if (activeModule === 'leaves' || activeModule === 'members') {
+          return (
+            <BrowserRouter>
+              <CongeAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+                <div className="w-full">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                    <button
+                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                    >
+                      ← Retour au Menu Principal du Site
+                    </button>
+                  </div>
+
+                  <Moduleconge />
+                </div>
+              </CongeAuthProvider>
+            </BrowserRouter>
+          );
+        }
+
+        if (activeModule === 'logistics' || activeModule === 'members') {
+          return (
+            <BrowserRouter>
+              <LogAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+                <div className="w-full">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                    <button
+                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                    >
+                      ← Retour au Menu Principal du Site
+                    </button>
+                  </div>
+
+                  <LogModuleApp />
+                </div>
+              </LogAuthProvider>
+            </BrowserRouter>
+          );
+        }
+
+        if (activeModule === 'account' || activeModule === 'members') {
+          return (
+            <BrowserRouter>
+                <div className="w-full">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                    <button
+                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                    >
+                      ← Retour au Menu Principal du Site
+                    </button>
+                  </div>
+
+                  <AccountModuleApp />
+                </div>
+            </BrowserRouter>
+          );
+        }
+
+        if (activeModule === 'accounting' || activeModule === 'members') {
+          return (
+            <BrowserRouter>
+              <CptAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+                <div className="w-full">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                    <button
+                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                    >
+                      ← Retour au Menu Principal du Site
+                    </button>
+                  </div>
+
+                  <ComptabiliteModuleApp />
+                </div>
+              </CptAuthProvider>
             </BrowserRouter>
           );
         }

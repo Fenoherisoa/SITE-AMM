@@ -51,8 +51,6 @@ try {
       : initializeApp(firebaseConfig);
 
     auth = getAuth(app);
-
-    // NAITSISO ETO: Atao getDatabase(app) fotsiny fa efa ao anaty firebaseConfig ny databaseURL
     database = getDatabase(app);
 
     console.info('[Firebase] Initialisation réussie.');
@@ -72,7 +70,8 @@ try {
   database = null;
 }
 
-export { app, auth, database };
+// Exports niarahana (misy na ny app, auth, database, db, ary ireo functions mpanampy)
+export { app, auth, database, database as db };
 
 export function getFirebaseDatabase(): Database {
   if (!database) {
