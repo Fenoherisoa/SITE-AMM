@@ -359,11 +359,18 @@ export default function App() {
       }
 
       // 4. Raha vao tonga eto, dia midika fa Android/iOS tena izy izany
-      const verified = await NativeBiometric.verify({
-        reason: "Authentification biométrique",
-        title: "AMM Pay",
-        subtitle: "Veuillez confirmer votre identité",
-      });
+      const biometricPlugin = NativeBiometric as any;
+      const verified = biometricPlugin.verifyIdentity 
+        ? await biometricPlugin.verifyIdentity({
+            reason: "Authentification biométrique",
+            title: "AMM Pay",
+            subtitle: "Veuillez confirmer votre identité",
+          })
+        : await biometricPlugin.verify({
+            reason: "Authentification biométrique",
+            title: "AMM Pay",
+            subtitle: "Veuillez confirmer votre identité",
+          });
 
       if (verified.verified) {
         const savedReq = await dbService.fetchUserRequest(m);

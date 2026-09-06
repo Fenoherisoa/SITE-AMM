@@ -1,4 +1,4 @@
-export type CurrencyCode = 'XOF' | 'EUR' | 'USD';
+export type CurrencyCode = 'MGA' | 'EUR' | 'USD' | 'XOF';
 
 export type StockStatus = 'NORMAL' | 'LOW' | 'OUT_OF_STOCK';
 
@@ -22,7 +22,7 @@ export interface InventoryItem {
   description: string;
   quantity: number;
   minThreshold: number; // Low stock alert level
-  unitPrice: number; // FCFA or EUR
+  unitPrice: number; // MGA or EUR
   totalValue: number; // quantity * unitPrice
   location: string; // e.g., Entrepôt Principal, Bureau Central, Antenne Ouest
   condition: ItemCondition;

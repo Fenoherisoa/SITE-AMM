@@ -33,8 +33,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 1. Check for active local / centralized SITE AMM session first
+    const restored = AuthService.restoreCentralizedSession();
+    if (restored) {
+      setUserProfile(restored);
+      setCurrentUser({
+        uid: restored.uid,
+        email: restored.email,
+        displayName: restored.displayName,
+      } as unknown as User);
+      setIsLoading(false);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      setIsLoading(true);
       if (fbUser) {
         try {
           const profile = await AuthService.getUserProfile(fbUser.uid);
@@ -49,9 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setUserProfile(profile);
             }
           } else {
-            // First time or missing DB record
             setCurrentUser(fbUser);
-            // Fetch again or trigger fallback creation
             const fresh = await AuthService.getUserProfile(fbUser.uid);
             setUserProfile(fresh);
           }
@@ -60,8 +69,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setError(err.message || 'Erreur lors de la vérification de session.');
         }
       } else {
-        setCurrentUser(null);
-        setUserProfile(null);
+        // If not logged into Firebase Auth, preserve verified centralized session if active
+        const existingSession = AuthService.restoreCentralizedSession();
+        if (!existingSession) {
+          setCurrentUser(null);
+          setUserProfile(null);
+        }
       }
       setIsLoading(false);
     });
@@ -69,17 +82,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, pass: string) => {
+  const login = async (identifier: string, pass: string) => {
     setError(null);
     setIsLoading(true);
     try {
-      const profile = await AuthService.loginWithFirebase(email, pass);
+      const profile = await AuthService.loginWithFirebase(identifier, pass);
       setUserProfile(profile);
+      setCurrentUser({
+        uid: profile.uid,
+        email: profile.email,
+        displayName: profile.displayName,
+      } as unknown as User);
     } catch (err: any) {
       console.error('[AuthContext] Login error:', err);
       let msg = 'Échec de la connexion. Vérifiez vos identifiants.';
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        msg = 'Email ou mot de passe incorrect.';
+        msg = 'Identifiant ou mot de passe incorrect.';
       } else if (err.code === 'auth/too-many-requests') {
         msg = 'Accès temporairement bloqué suite à de trop nombreuses tentatives.';
       } else if (err.message) {

@@ -122,8 +122,7 @@ export interface StorageService {
   deleteFile(fileId: string): Promise<boolean>;
 }
 
-
-export interface Member {
+export interface BaseAmmMember {
   id: string;
   matricule: string;
   anarana: string;

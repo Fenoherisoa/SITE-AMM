@@ -203,7 +203,7 @@ export const LeavePage: React.FC = () => {
         totalDays: computedDays || 1,
         reason: reason.trim(),
         leaveType,
-        status: 'PENDING',
+        status: 'PENDING' as const,
         isHalfDayStart: false,
         isHalfDayEnd: false,
         createdAt: new Date().toISOString(),

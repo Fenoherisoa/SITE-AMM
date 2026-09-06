@@ -32,6 +32,7 @@ export interface Employee {
   region?: string
   district?: string
   commune?: string
+  contractType?: 'permanent' | 'contractuel' | 'temporaire' | 'externe' | 'membre'
   fokontany?: string
   cin?: string
   date_naissance?: string
@@ -41,15 +42,39 @@ export interface Employee {
   createdAt?: string
 }
 
+export type PersonnelCategory = 'permanent' | 'contractuel' | 'temporaire' | 'externe' | 'membre'
+
 export interface PayrollEntry {
   id: string
   employeeId: string
+  employeeName?: string
+  matricule?: string
+  contractType?: PersonnelCategory
   month: string
   baseSalary: number
   bonus: number
   deductions: number
   netSalary: number
   createdAt: string
+  indemnites?: number
+  status?: 'EN_ATTENTE' | 'VALIDE' | 'PAYE' | 'ANNULE'
+  paymentMethod?: 'Virement Bancaire' | 'Espèces / Caisse' | 'Mobile Money' | 'Chèque'
+  paidAt?: string
+  departmentId?: string
+  notes?: string
+  primesBreakdown?: { id: string; name: string; amount: number }[]
+  indemnitesBreakdown?: { id: string; name: string; amount: number }[]
+}
+
+export interface PayrollBudget {
+  id?: string
+  period: string // e.g. "2026-09" or "2026"
+  allocatedAmount: number
+  alertThresholdPercent?: number
+  notes?: string
+  departmentAllocations?: Record<string, number>
+  updatedAt?: string
+  updatedBy?: string
 }
 
 export interface AttendanceRecord {

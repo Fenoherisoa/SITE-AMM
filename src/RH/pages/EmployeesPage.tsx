@@ -1,5 +1,5 @@
 import { onValue, ref } from 'firebase/database'
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../firebase/firebaseConfig'
 import madagascarData from '../data/madagascarData'

@@ -33,7 +33,7 @@ function MainAppContent() {
 
   // Navigation & Preferences
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [currency, setCurrency] = useState<CurrencyCode>('XOF');
+  const [currency, setCurrency] = useState<CurrencyCode>('MGA');
   const [isFirebaseConnected, setIsFirebaseConnected] = useState<boolean>(true);
 
   // Core Data States

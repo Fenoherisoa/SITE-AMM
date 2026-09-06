@@ -8,7 +8,7 @@ export const INITIAL_PROFILE: AssociationProfile = {
   phone: '+221 33 820 15 15 / +33 1 40 50 60 70',
   email: 'logistique@site-amm.org',
   taxNumber: 'NINEA 008493021 / AMM-2026',
-  defaultCurrency: 'XOF',
+  defaultCurrency: 'MGA',
   warehouseLocations: [
     'Entrepôt Principal (Siège)',
     'Bureau Central',
@@ -89,7 +89,7 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     description: 'Core i7, 16 Go RAM, SSD 512 Go pour équipe projet AMM',
     quantity: 12,
     minThreshold: 3,
-    unitPrice: 650000, // FCFA
+    unitPrice: 650000, // MGA
     totalValue: 7800000,
     location: 'Entrepôt Principal (Siège)',
     condition: 'Neuf',
@@ -307,7 +307,7 @@ export const INITIAL_TRANSACTIONS: FinancialTransaction[] = [
     category: 'Subventions & Dons',
     title: 'Subvention Partenaire Annuelle 2026',
     description: 'Soutien financier alloué pour les projets d\'équipement et logistique SITE-AMM',
-    amount: 18500000, // FCFA
+    amount: 18500000, // MGA
     date: '2026-07-01',
     paymentMethod: 'Virement Bancaire',
     account: 'Compte Bancaire AMM',

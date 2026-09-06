@@ -173,7 +173,13 @@ export default function App() {
         }
 
         // 1. Raha misy module voafidy
-        if (activeModule === 'members' || activeModule === 'adhesion' || activeModule === 'hr') {
+        if (activeModule === 'members' || activeModule === 'adhesion' || activeModule === 'operations' || activeModule === 'settings') {
+          const tabMapping: Record<string, string> = {
+            members: 'members',
+            adhesion: 'adhesion',
+            operations: 'operations',
+            settings: 'parametre'
+          };
           return (
             <BrowserRouter>
               <RHAuthProvider>
@@ -186,23 +192,17 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-
-                  {activeModule === 'hr' ? (
-                    <RHAppModule />
-                  ) : (
-                    <MembersAppModule />
-                  )}
+                  <MembersAppModule initialTab={tabMapping[activeModule] || 'overview'} />
                 </div>
               </RHAuthProvider>
             </BrowserRouter>
           );
         }
 
-        // Raha misy module voafidy (hr na members)
-        if (activeModule === 'hr' || activeModule === 'members') {
+        if (activeModule === 'hr' || activeModule === 'payroll') {
           return (
             <BrowserRouter>
-              <RHAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+              <RHAuthProvider>
                 <div className="w-full">
                   <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
                     <button
@@ -212,7 +212,6 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-
                   <RHAppModule />
                 </div>
               </RHAuthProvider>
@@ -220,10 +219,10 @@ export default function App() {
           );
         }
 
-        if (activeModule === 'leaves' || activeModule === 'members') {
+        if (activeModule === 'leaves') {
           return (
             <BrowserRouter>
-              <CongeAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+              <CongeAuthProvider>
                 <div className="w-full">
                   <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
                     <button
@@ -233,7 +232,6 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-
                   <Moduleconge />
                 </div>
               </CongeAuthProvider>
@@ -241,10 +239,10 @@ export default function App() {
           );
         }
 
-        if (activeModule === 'logistics' || activeModule === 'members') {
+        if (activeModule === 'logistics') {
           return (
             <BrowserRouter>
-              <LogAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+              <LogAuthProvider>
                 <div className="w-full">
                   <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
                     <button
@@ -254,7 +252,6 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-
                   <LogModuleApp />
                 </div>
               </LogAuthProvider>
@@ -262,7 +259,7 @@ export default function App() {
           );
         }
 
-        if (activeModule === 'account' || activeModule === 'members') {
+        if (activeModule === 'account') {
           return (
             <BrowserRouter>
                 <div className="w-full">
@@ -274,17 +271,16 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-
                   <AccountModuleApp />
                 </div>
             </BrowserRouter>
           );
         }
 
-        if (activeModule === 'accounting' || activeModule === 'members') {
+        if (activeModule === 'accounting') {
           return (
             <BrowserRouter>
-              <CptAuthProvider> {/* <--- Tsy maintsy atao eto izy mba hamahana ilay error */}
+              <CptAuthProvider>
                 <div className="w-full">
                   <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
                     <button
@@ -294,7 +290,6 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-
                   <ComptabiliteModuleApp />
                 </div>
               </CptAuthProvider>

@@ -201,7 +201,7 @@ export const AccountingPage = () => {
       item.amount.toLocaleString('en-US').replace(/,/g, ' ') + ' Ar'
     ])
 
-    ;(doc as autoTable).autoTable({
+    ;(doc as any).autoTable({
       startY: 42,
       head: [['Date', 'N° Pièce', 'Libellé des Opérations', 'Débit (Compte)', 'Crédit (Compte)', 'Montant']],
       body: tableRows,

@@ -281,6 +281,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
           console.warn('[Firebase Auth] Exception loading profile:', err);
         }
+      } else {
+        // Fallback to central SITE AMM authenticated session
+        try {
+          const centralRaw = localStorage.getItem('amm_authenticated_user');
+          if (centralRaw) {
+            const cUser = JSON.parse(centralRaw);
+            const roleMap: Record<string, UserRole> = {
+              ADMIN: 'ADMIN',
+              SUPER_ADMIN: 'ADMIN',
+              DIRECTEUR: 'ADMIN',
+              RH: 'LOGISTICS_MANAGER',
+              COMPTABLE: 'FINANCIAL_OFFICER',
+              USER: 'AGENT'
+            };
+            const mappedRole: UserRole = roleMap[cUser.role] || 'LOGISTICS_MANAGER';
+            const centralProfile: UserProfile = {
+              uid: cUser.uid || cUser.id || 'central-session',
+              email: cUser.email || 'user@siteamm.mg',
+              displayName: cUser.displayName || cUser.username || 'Utilisateur AMM',
+              role: mappedRole,
+              department: 'Coordination Générale',
+              status: 'ACTIVE',
+              mfaEnabled: false,
+              lastLogin: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+              permissions: ROLE_PERMISSIONS[mappedRole] || ROLE_PERMISSIONS['AGENT']
+            };
+            setUserProfile(centralProfile);
+            setActiveRole(mappedRole);
+          }
+        } catch (e) {
+          console.warn('Error reading central session in Logistics:', e);
+        }
       }
       setLoading(false);
     });

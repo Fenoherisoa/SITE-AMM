@@ -35,7 +35,7 @@ export default function Sidebar({
     { id: "members", label: "Membres", icon: FileText, perm: userPermissions.members },
     { id: "enquetes", label: "Enquêtes", icon: CheckSquare, perm: userPermissions.enquetes },
     { id: "accounting", label: "Comptabilité", icon: Landmark, perm: userPermissions.accounting },
-    { id: "operations", label: "Opérations", icon: Clock, perm: userPermissions.operations },
+    { id: "operations", label: "Opérations / Caisse", icon: Clock, perm: userPermissions.operations },
     { id: "historiquetrans", label: "Transactions", icon: HistoryIcon, perm: userPermissions.historiquetrans || true },
     { id: "historique", label: "Logs", icon: Terminal, perm: userPermissions.historique },
     { id: "calendar", label: "Calendrier", icon: Calendar, perm: userPermissions.calendar },

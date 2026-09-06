@@ -1,8 +1,32 @@
 import { CurrencyCode, StockStatus } from '../types';
 
-export const FORMAT_CURRENCY = (amount: number, currency: CurrencyCode = 'XOF'): string => {
+export const FORMAT_CURRENCY = (amount: number, currency: CurrencyCode = 'MGA'): string => {
   if (isNaN(amount) || amount === null || amount === undefined) {
-    return `0 ${currency}`;
+    return `0 ${currency === 'MGA' ? 'Ar' : currency}`;
+  }
+
+  if (currency === 'MGA') {
+    return `${Math.round(amount).toLocaleString('fr-FR')} Ar`;
+  }
+
+  if (currency === 'EUR') {
+    // Standard exchange reference: 1 EUR ~ 4 900 MGA
+    const eurVal = amount > 1000 ? amount / 4900 : amount;
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 2,
+    }).format(eurVal);
+  }
+
+  if (currency === 'USD') {
+    // Standard exchange reference: 1 USD ~ 4 500 MGA
+    const usdVal = amount > 1000 ? amount / 4500 : amount;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2,
+    }).format(usdVal);
   }
 
   if (currency === 'XOF') {
@@ -13,27 +37,7 @@ export const FORMAT_CURRENCY = (amount: number, currency: CurrencyCode = 'XOF'):
     }).format(amount).replace('CFA', 'FCFA');
   }
 
-  if (currency === 'EUR') {
-    // Convert XOF base to EUR (approx 1 EUR = 655.957 XOF)
-    const eurVal = amount / 655.957;
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 2,
-    }).format(eurVal);
-  }
-
-  if (currency === 'USD') {
-    // Convert XOF base to USD (approx 1 USD = 600 XOF)
-    const usdVal = amount / 600;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 2,
-    }).format(usdVal);
-  }
-
-  return `${amount.toLocaleString()} ${currency}`;
+  return `${amount.toLocaleString('fr-FR')} ${currency}`;
 };
 
 export const FORMAT_DATE = (dateString?: string, includeTime: boolean = false): string => {

@@ -30,7 +30,7 @@ export const EmployeeDetailPage = () => {
         ])
 
         if (active) {
-          console.data = employeeData
+          console.log("employeeData:", employeeData)
           if (!employeeData) {
             setError(`Tsy hita tao amin'ny database ilay mpiasa manana ID: ${id}`)
           } else {

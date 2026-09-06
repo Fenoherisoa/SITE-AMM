@@ -68,7 +68,7 @@ export const getCurrentUserProfile = async (uid: string): Promise<AppUser | null
   return data ? { ...(data as AppUser), uid, email: data.email ?? '' } as AppUser : null
 }
 
-export const registerUser = async (email: string, password: string, role: Role, name: string) => {
+export const registerUser = async (email: string, password: string, role: Role, name: string, matricule?: string) => {
   try {
     const newRef = push(getUsersRef())
     const permissions = {
@@ -96,6 +96,7 @@ export const registerUser = async (email: string, password: string, role: Role, 
       password,
       status: 'active',
       createdAt: new Date().toISOString(),
+      ...(matricule ? { matricule } : {})
     }
 
     await set(newRef, profile)

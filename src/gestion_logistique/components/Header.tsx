@@ -153,12 +153,12 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Currency Switcher */}
               <div className="hidden sm:flex items-center rounded-lg bg-slate-800 p-1 border border-slate-700 text-xs">
                 <button
-                  onClick={() => setCurrency('XOF')}
+                  onClick={() => setCurrency('MGA')}
                   className={`px-2 py-1 rounded-md font-semibold transition-all ${
-                    currency === 'XOF' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                    currency === 'MGA' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  FCFA
+                  MGA (Ar)
                 </button>
                 <button
                   onClick={() => setCurrency('EUR')}

@@ -30,6 +30,7 @@ interface Props {
   handleForgotRequest: () => void;
   handleVerifyCode: () => void;
   handleResetFinal: () => void;
+  logo?: any;
 }
 
 export default function AuthScreens({

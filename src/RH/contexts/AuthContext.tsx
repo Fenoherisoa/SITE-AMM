@@ -32,6 +32,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (raw) {
         const parsed = JSON.parse(raw) as AppUser
         setUser(parsed)
+      } else {
+        const centralRaw = window.localStorage.getItem('amm_authenticated_user')
+        if (centralRaw) {
+          const cUser = JSON.parse(centralRaw)
+          setUser({
+            uid: cUser.uid || cUser.id || 'central-session',
+            email: cUser.email || '',
+            displayName: cUser.displayName || cUser.username || '',
+            role: cUser.role || 'USER',
+            permissions: cUser.permissions || {}
+          } as AppUser)
+        }
       }
     } catch {
       window.localStorage.removeItem(storageKey)

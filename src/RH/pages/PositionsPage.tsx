@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { addPosition, deletePosition, getPositions, updatePosition } from '../services/employeesService'
 import type { Position } from '../types'
 

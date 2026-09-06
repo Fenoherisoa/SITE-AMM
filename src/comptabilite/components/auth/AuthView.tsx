@@ -166,14 +166,14 @@ export const AuthView: React.FC = () => {
             
             <div className="space-y-1.5">
               <label className="block text-slate-300 font-semibold">
-                Adresse Email Professionnelle *
+                Identifiant, Email ou Matricule *
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="nom@entreprise.com"
+                  placeholder="admin, raveloarison777@gmail.com, AMM-RH-..."
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"

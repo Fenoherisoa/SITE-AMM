@@ -125,7 +125,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   onChange={(e) => setFormData({ ...formData, defaultCurrency: e.target.value as CurrencyCode })}
                   className="w-full px-3 py-2.5 rounded-xl border bg-slate-50 dark:bg-slate-800 outline-none"
                 >
-                  <option value="XOF">FCFA (XOF)</option>
+                  <option value="MGA">Ariary (MGA / Ar)</option>
                   <option value="EUR">Euro (€)</option>
                   <option value="USD">Dollar ($)</option>
                 </select>

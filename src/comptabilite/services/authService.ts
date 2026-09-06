@@ -105,155 +105,242 @@ export class AuthService {
   }
 
   /**
-   * Real Authentication Login against Firebase Auth with DB Sync Fallback
+   * Real Authentication Login against Realtime Database or Firebase Auth
+   * Supports username, matricule, or email with access code / password
    */
-  public static async loginWithFirebase(email: string, pass: string): Promise<UserProfile> {
-    const cleanEmail = email.trim();
-    let firebaseUser: User;
+  public static async loginWithFirebase(identifier: string, pass: string): Promise<UserProfile> {
+    const cleanId = identifier.trim();
+    if (!cleanId || !pass) {
+      throw new Error('Veuillez renseigner votre identifiant et votre mot de passe.');
+    }
 
+    const ALLOWED_ROLES: UserRole[] = ['ADMIN', 'DIRECTEUR', 'COMPTABLE', 'GESTIONNAIRE', 'ASSISTANT COMPTABLE'];
+
+    // 1. Primary check: verify against Realtime Database users
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, pass);
-      firebaseUser = userCredential.user;
-    } catch (authError: any) {
-      // Check if user exists in Realtime Database (pre-provisioned by admin/system)
       const usersRef = ref(db, USERS_PATH);
       const snapshot = await get(usersRef);
-      const allUsersVal = snapshot.val() || {};
-      const userEntries = Object.entries(allUsersVal) as [string, UserProfile][];
-      
-      const existingEntry = userEntries.find(([_, profile]) => profile.email?.toLowerCase() === cleanEmail.toLowerCase());
+      if (snapshot.exists()) {
+        const allUsersVal = snapshot.val() as Record<string, any>;
+        const entries = Object.entries(allUsersVal);
 
-      if (existingEntry) {
-        const [oldUid, existingProfile] = existingEntry;
-        try {
-          // Automatically create the Auth account if it only exists in the Realtime Database
-          const newUserCredential = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
-          firebaseUser = newUserCredential.user;
-          await updateProfile(firebaseUser, { displayName: existingProfile.displayName });
+        // Find user by key, email, matricule, or username (case-insensitive)
+        const match = entries.find(([key, user]) => {
+          const k = key.toLowerCase();
+          const q = cleanId.toLowerCase();
+          const email = (user.email || '').toLowerCase();
+          const matricule = (user.matricule || '').toLowerCase();
+          const username = (user.username || user.name || '').toLowerCase();
+          return k === q || email === q || matricule === q || username === q;
+        });
 
-          // Update UID reference in Database if it changed
-          if (oldUid !== firebaseUser.uid) {
-            existingProfile.uid = firebaseUser.uid;
-            await set(ref(db, `${USERS_PATH}/${firebaseUser.uid}`), existingProfile);
+        if (match) {
+          const [userKey, userData] = match;
+
+          // Verify password or access code
+          const expectedPass = String(userData.password ?? userData.code ?? userData.pin ?? '');
+          if (expectedPass !== pass) {
+            await this.logAuditAction(
+              userKey,
+              userData.email || cleanId,
+              userData.displayName || userKey,
+              (userData.role?.toUpperCase() || 'COMPTABLE') as UserRole,
+              'ECHEC_CONNEXION',
+              `Tentative de connexion avec code/mot de passe invalide pour ${cleanId}`
+            );
+            throw new Error('Identifiants incorrects (mot de passe ou code d’accès invalide).');
           }
-        } catch (creationError: any) {
-          if (creationError.code === 'auth/email-already-in-use') {
-            throw new Error('Identifiants incorrects (mot de passe invalide). Veuillez vérifier votre mot de passe.');
+
+          // Check if disabled / suspended
+          if (userData.status === 'DISABLED' || userData.status === 'SUSPENDED') {
+            throw new Error('Votre compte utilisateur a été désactivé par l’administrateur.');
           }
-          throw creationError;
-        }
-      } else {
-        const isFirstUser = Object.keys(allUsersVal).length === 0;
 
-        if (
-          isFirstUser &&
-          (authError.code === 'auth/invalid-credential' ||
-           authError.code === 'auth/user-not-found' ||
-           authError.code === 'auth/wrong-password')
-        ) {
-          // Create initial Master ADMIN in Firebase Auth
-          const newUserCredential = await createUserWithEmailAndPassword(auth, cleanEmail, pass);
-          firebaseUser = newUserCredential.user;
+          // Verify role & permissions
+          const rawRole = String(userData.role || '').toUpperCase();
+          let userRole: UserRole = 'COMPTABLE';
+          if (rawRole === 'SUPER_ADMIN' || rawRole === 'SUPER ADMIN' || rawRole === 'ADMIN') {
+            userRole = 'ADMIN';
+          } else if (rawRole === 'DIRECTEUR') {
+            userRole = 'DIRECTEUR';
+          } else if (rawRole === 'GESTIONNAIRE') {
+            userRole = 'GESTIONNAIRE';
+          } else if (rawRole === 'ASSISTANT COMPTABLE') {
+            userRole = 'ASSISTANT COMPTABLE';
+          }
 
-          await updateProfile(firebaseUser, { displayName: cleanEmail.split('@')[0] });
+          const hasPermission = 
+            ALLOWED_ROLES.includes(userRole) ||
+            userData.permissions?.accounting === true ||
+            userData.permissions?.financial === true;
 
-          const adminProfile: UserProfile = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email || cleanEmail,
-            displayName: cleanEmail.split('@')[0],
-            role: 'ADMIN',
+          if (!hasPermission) {
+            throw new Error(`Accès refusé. Le rôle '${userData.role || 'Inconnu'}' n'est pas autorisé à accéder au module Comptabilité.`);
+          }
+
+          // Build verified profile
+          const profile: UserProfile = {
+            uid: userKey,
+            email: userData.email || `${userKey}@amm.mg`,
+            displayName: userData.name || userData.displayName || userData.username || userKey,
+            role: userRole,
             status: 'ACTIVE',
-            department: 'Direction générale',
-            createdAt: new Date().toISOString(),
+            department: userData.department || 'Comptabilité & Finances',
+            createdAt: userData.createdAt || new Date().toISOString(),
             lastLoginAt: new Date().toISOString(),
           };
 
-          await set(ref(db, `${USERS_PATH}/${firebaseUser.uid}`), adminProfile);
+          // Update last login in RTDB
+          try {
+            await update(ref(db, `${USERS_PATH}/${userKey}`), { lastLoginAt: profile.lastLoginAt });
+          } catch (e) {
+            console.warn('[AuthService] Could not update lastLoginAt:', e);
+          }
+
+          // Save session to localStorage
+          localStorage.setItem('cpt_auth_session', JSON.stringify(profile));
 
           await this.logAuditAction(
-            adminProfile.uid,
-            adminProfile.email,
-            adminProfile.displayName,
-            adminProfile.role,
-            'INITIALISATION_ADMIN',
-            'Initialisation automatique du premier compte Administrateur système'
+            profile.uid,
+            profile.email,
+            profile.displayName,
+            profile.role,
+            'CONNEXION',
+            `Connexion réussie au module Comptabilité (Authentification Base AMM)`
           );
 
-          return adminProfile;
+          return profile;
         }
+      }
+    } catch (dbErr: any) {
+      if (dbErr.message && !dbErr.message.includes('permission_denied')) {
+        // If it's our own thrown error (e.g. invalid password or access denied), rethrow it!
+        if (dbErr.message.includes('Identifiants incorrects') || dbErr.message.includes('Accès refusé') || dbErr.message.includes('désactivé')) {
+          throw dbErr;
+        }
+      }
+      console.warn('[AuthService] RTDB lookup failed or fallback needed:', dbErr);
+    }
 
-        if (
-          authError.code === 'auth/invalid-credential' ||
-          authError.code === 'auth/user-not-found' ||
-          authError.code === 'auth/wrong-password'
-        ) {
-          throw new Error(
-            'Identifiants incorrects (email ou mot de passe invalide). Veuillez vérifier vos saisies ou contacter votre administrateur système pour faire pré-provisionner votre accès.'
-          );
-        } else if (authError.code === 'auth/too-many-requests') {
-          throw new Error('Accès temporairement bloqué suite à de trop nombreuses tentatives infructueuses.');
-        } else {
-          throw authError;
-        }
+    // 2. Fallback check: Firebase Auth (for standard Firebase accounts with email & 6+ chars password)
+    let firebaseUser: User;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, cleanId, pass);
+      firebaseUser = userCredential.user;
+    } catch (authError: any) {
+      if (
+        authError.code === 'auth/invalid-credential' ||
+        authError.code === 'auth/user-not-found' ||
+        authError.code === 'auth/wrong-password' ||
+        authError.code === 'auth/invalid-email'
+      ) {
+        throw new Error('Identifiants incorrects (email/identifiant ou mot de passe invalide).');
+      } else if (authError.code === 'auth/too-many-requests') {
+        throw new Error('Accès temporairement bloqué suite à de trop nombreuses tentatives.');
+      } else {
+        throw authError;
       }
     }
 
-    // Fetch existing database user profile
+    // Fetch existing database user profile for Firebase User
     let profile = await this.getUserProfile(firebaseUser.uid);
 
-    // Security check 1: If account exists and is DISABLED, sign out immediately
     if (profile && profile.status === 'DISABLED') {
       await signOut(auth);
       throw new Error('Votre compte utilisateur a été désactivé par l’administrateur système.');
     }
 
-    // Security check 2: Verify role is within the 5 authorized roles
-    const ALLOWED_ROLES: UserRole[] = ['ADMIN', 'DIRECTEUR', 'COMPTABLE', 'GESTIONNAIRE', 'ASSISTANT COMPTABLE'];
     if (profile && !ALLOWED_ROLES.includes(profile.role)) {
       await signOut(auth);
       throw new Error(`Accès refusé. Le rôle '${profile.role}' n'est pas autorisé.`);
     }
 
-    // Security check 3: If profile does not exist in Database yet
     if (!profile) {
-      const usersRef = ref(db, USERS_PATH);
-      const snapshot = await get(usersRef);
-      const isFirstUser = !snapshot.exists() || Object.keys(snapshot.val() || {}).length === 0;
-
-      if (isFirstUser) {
-        profile = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email || cleanEmail,
-          displayName: firebaseUser.displayName || cleanEmail.split('@')[0],
-          role: 'ADMIN',
-          status: 'ACTIVE',
-          department: 'Direction générale',
-          createdAt: new Date().toISOString(),
-          lastLoginAt: new Date().toISOString(),
-        };
-        await set(ref(db, `${USERS_PATH}/${firebaseUser.uid}`), profile);
-      } else {
-        await signOut(auth);
-        throw new Error('Accès refusé. Ce compte n’a pas été pré-provisionné dans la base de données par l’administrateur système.');
-      }
+      profile = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || cleanId,
+        displayName: firebaseUser.displayName || cleanId.split('@')[0],
+        role: 'ADMIN',
+        status: 'ACTIVE',
+        department: 'Direction générale',
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      await set(ref(db, `${USERS_PATH}/${firebaseUser.uid}`), profile);
     } else {
-      // Update last login timestamp
       const lastLoginAt = new Date().toISOString();
       await update(ref(db, `${USERS_PATH}/${firebaseUser.uid}`), { lastLoginAt });
       profile.lastLoginAt = lastLoginAt;
     }
 
-    // Audit Log
+    localStorage.setItem('cpt_auth_session', JSON.stringify(profile));
+
     await this.logAuditAction(
       profile.uid,
       profile.email,
       profile.displayName,
       profile.role,
       'CONNEXION',
-      'Connexion réussie au système SITE-AMM'
+      'Connexion réussie au système SITE-AMM via Firebase Auth'
     );
 
     return profile;
+  }
+
+  /**
+   * Restores session from SITE AMM centralized authentication or local session
+   */
+  public static restoreCentralizedSession(): UserProfile | null {
+    try {
+      // Check accounting-specific session first
+      const savedCpt = localStorage.getItem('cpt_auth_session');
+      if (savedCpt) {
+        const parsed = JSON.parse(savedCpt) as UserProfile;
+        if (parsed && parsed.uid && parsed.role) {
+          return parsed;
+        }
+      }
+
+      // Check central SITE AMM authentication session
+      const savedAmm = localStorage.getItem('amm_authenticated_user');
+      if (savedAmm) {
+        const ammUser = JSON.parse(savedAmm);
+        if (ammUser && ammUser.uid) {
+          let role: UserRole = 'COMPTABLE';
+          const r = String(ammUser.role || '').toUpperCase();
+          if (r === 'ADMIN' || r === 'SUPER_ADMIN' || r === 'SUPER ADMIN') {
+            role = 'ADMIN';
+          } else if (r === 'DIRECTEUR') {
+            role = 'DIRECTEUR';
+          } else if (r === 'GESTIONNAIRE') {
+            role = 'GESTIONNAIRE';
+          } else if (r === 'ASSISTANT COMPTABLE') {
+            role = 'ASSISTANT COMPTABLE';
+          } else if (r === 'COMPTABLE' || ammUser.permissions?.accounting) {
+            role = 'COMPTABLE';
+          } else {
+            return null; // Not authorized for accounting
+          }
+
+          const profile: UserProfile = {
+            uid: ammUser.uid,
+            email: ammUser.email || `${ammUser.uid}@amm.mg`,
+            displayName: ammUser.displayName || ammUser.name || ammUser.username || ammUser.uid,
+            role,
+            status: ammUser.status === 'DISABLED' || ammUser.status === 'SUSPENDED' ? 'DISABLED' : 'ACTIVE',
+            department: ammUser.department || 'Direction & Comptabilité',
+            createdAt: ammUser.createdAt || new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+          };
+
+          localStorage.setItem('cpt_auth_session', JSON.stringify(profile));
+          return profile;
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthService] Error restoring centralized session:', e);
+    }
+    return null;
   }
 
   /**
@@ -421,6 +508,10 @@ export class AuthService {
    * Sign Out
    */
   public static async logout(currentUserProfile?: UserProfile | null): Promise<void> {
+    try {
+      localStorage.removeItem('cpt_auth_session');
+    } catch (e) {}
+
     if (currentUserProfile) {
       await this.logAuditAction(
         currentUserProfile.uid,
@@ -431,6 +522,6 @@ export class AuthService {
         'Fermeture de session'
       );
     }
-    await signOut(auth);
+    await signOut(auth).catch(() => {});
   }
 }

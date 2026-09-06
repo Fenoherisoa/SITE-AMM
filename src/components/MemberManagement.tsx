@@ -3,7 +3,6 @@ import { Member, UserMetadata } from '../types';
 import { memberService } from '../services/memberService';
 import { storageService } from '../services/storageService';
 import { auditService } from '../services/auditService';
-import MembersAppModule from './MembersAppModule';
 import { 
   Users, Search, Filter, Plus, Edit2, Eye, Archive, 
   CheckCircle2, AlertCircle, X, Shield, Phone, Mail, 

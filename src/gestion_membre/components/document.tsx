@@ -1,4 +1,75 @@
-export const loadAndGenerateAttestation = async (item, typeDossier = 'Attestation') => {
+import { BASE_URL, base64Logo } from '../constants';
+
+const saveDossierToHistory = async (mem: any, _info: any, typeDossier: string): Promise<string> => {
+  const numDossier = `AMM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  try {
+    await fetch(`${BASE_URL}/dossiers.json`, {
+      method: 'POST',
+      body: JSON.stringify({
+        numero: numDossier,
+        type: typeDossier,
+        matricule: mem?.matricule || mem?.id || '',
+        nom: mem?.anarana || '',
+        date_emission: new Date().toISOString()
+      })
+    });
+  } catch (e) {
+    console.warn('Could not save dossier to history', e);
+  }
+  return numDossier;
+};
+
+const generateAttestation = (member: any, assoData: any, numDossier: string) => {
+  const info = assoData || {};
+  const mem = member || {};
+  const today = new Date().toLocaleDateString('fr-FR');
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Attestation - ${mem.anarana || 'Membre'}</title>
+        <style>
+          body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #1e293b; }
+          .header { text-align: center; border-bottom: 2px solid #0d3373; padding-bottom: 15px; margin-bottom: 25px; }
+          .title { font-size: 20px; font-weight: bold; text-transform: uppercase; color: #0d3373; }
+          .content { font-size: 14px; line-height: 1.8; margin-top: 30px; }
+          .ref { font-size: 12px; color: #64748b; text-align: right; }
+          .footer { margin-top: 60px; display: flex; justify-content: space-between; }
+        </style>
+      </head>
+      <body>
+        <div class="ref">Réf: ${numDossier}</div>
+        <div class="header">
+          <div class="title">${info.nom_association || 'ASSOCIATION MALAGASY MIRAY'}</div>
+          <div>${info.siege_social || ''}</div>
+        </div>
+        <h2 style="text-align: center; text-decoration: underline;">ATTESTATION D'APPARTENANCE</h2>
+        <div class="content">
+          <p>Nous soussignés, certifions par la présente que :</p>
+          <p><b>Nom & Prénoms :</b> ${mem.anarana || '---'}</p>
+          <p><b>Matricule :</b> ${mem.matricule || mem.id || '---'}</p>
+          <p><b>CIN :</b> ${mem.cin || '---'}</p>
+          <p><b>Projet / Activité :</b> ${mem.tetikasa || '---'}</p>
+          <p>Est régulièrement inscrit(e) comme membre de notre organisation associative.</p>
+          <p>En foi de quoi, la présente attestation lui est délivrée pour servir et valoir ce que de droit.</p>
+        </div>
+        <div style="text-align: right; margin-top: 40px;">Fait le ${today}</div>
+        <div class="footer">
+          <div>Le Membre</div>
+          <div>La Direction</div>
+        </div>
+        <script>
+          window.onload = function() { window.print(); };
+        </script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+};
+
+export const loadAndGenerateAttestation = async (item: any, typeDossier = 'Attestation') => {
       const memberId = typeof item === 'object' ? (item.id || item.key) : item;
       
       try {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { addDepartment, deleteDepartment, getDepartments, updateDepartment } from '../services/employeesService'
 import type { Department } from '../types'
 

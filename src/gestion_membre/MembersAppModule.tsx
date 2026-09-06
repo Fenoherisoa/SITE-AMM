@@ -19,6 +19,7 @@ import MembersList from './components/MembersList';
 import EnquetesList from './components/EnquetesList';
 import TransactionsFormAndLog from './components/TransactionsFormAndLog';
 import MemberAccountDashboard from './components/MemberAccountDashboard';
+import CaisseOperationsTab from './components/CaisseOperationsTab';
 import CalendarTab from './components/CalendarTab';
 import MessengerTab from './components/MessengerTab';
 import SecurityTab from './components/SecurityTab';
@@ -26,10 +27,11 @@ import ParametresTab from './components/ParametresTab';
 import LogsList from './components/LogsList';
 import SplashScreen from './components/SplashScreen';
 
-export default function MembersAppModule() {
+export default function MembersAppModule({ initialTab }: { initialTab?: string } = {}) {
   // --- NAVIGATION & CONTROL STATES ---
-  const [isSplash, setIsSplash] = useState(true);
-  const [currentTab, setCurrentTab] = useState<string>("overview");
+  const [isSplash, setIsSplash] = useState(!initialTab);
+  const [currentTab, setCurrentTab] = useState<string>(initialTab || "overview");
+  const [operationsSubTab, setOperationsSubTab] = useState<'caisse' | 'members'>('caisse');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAppLoading, setIsAppLoading] = useState(false);
 
@@ -222,6 +224,57 @@ export default function MembersAppModule() {
       loadSystemDatabase();
     }
   }, [isLoggedIn, loadSystemDatabase]);
+
+  // Check for central authenticated session
+  useEffect(() => {
+    try {
+      const centralRaw = localStorage.getItem('amm_authenticated_user');
+      if (centralRaw) {
+        const cUser = JSON.parse(centralRaw);
+        if (cUser && (cUser.status === 'ACTIVE' || cUser.status === 'APPROVED' || !cUser.status)) {
+          setLoginUser(cUser.displayName || cUser.username || cUser.email || 'Admin');
+          
+          let role = 'NATIONAL_PRESIDENT';
+          if (cUser.role === 'ADMIN' || cUser.role === 'SUPER_ADMIN') {
+            role = 'NATIONAL_PRESIDENT';
+          } else if (cUser.role === 'DIRECTEUR' || cUser.role === 'RESPONSABLE') {
+            role = 'PROVINCIAL_CHIEF';
+          } else {
+            role = cUser.role || 'ENQUETEUR';
+          }
+          setCurrentUserRole(role);
+
+          const perms = {
+            overview: true,
+            adhesion: true,
+            members: true,
+            enquetes: true,
+            accounting: role === 'NATIONAL_PRESIDENT' || role === 'PROVINCIAL_CHIEF' || cUser.role === 'COMPTABLE',
+            operations: true,
+            historiquetrans: true,
+            historique: role === 'NATIONAL_PRESIDENT' || role === 'PROVINCIAL_CHIEF',
+            calendar: true,
+            messenger: true,
+            security: role === 'NATIONAL_PRESIDENT',
+            parametre: role === 'NATIONAL_PRESIDENT' || role === 'PROVINCIAL_CHIEF'
+          };
+          setUserPermissions(perms);
+          setIsLoggedIn(true);
+          setIsSplash(false);
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading central session in MembersAppModule:', e);
+    }
+  }, []);
+
+  // Sync initialTab when changed
+  useEffect(() => {
+    if (initialTab) {
+      setCurrentTab(initialTab);
+      setIsSplash(false);
+    }
+  }, [initialTab]);
 
   // --- SECURITY AUTHENTICATION HANDLERS ---
   const handleLogin = async () => {
@@ -1208,7 +1261,7 @@ export default function MembersAppModule() {
 
   // 2. Raha mbola "Loading" ny splash
   if (isSplash) {
-    return <AuthScreens/>;
+    return <SplashScreen />;
   }
 
   // --- RENDERING VIEWS CORRUPTER COMPOSERS ---
@@ -1431,14 +1484,52 @@ export default function MembersAppModule() {
                 />
               )}
 
-              {/* Tab 6: OPERATIONS LEDGERS DETAIL (Member Accounts balances) */}
+              {/* Tab 6: OPERATIONS & CAISSE DETAIL */}
               {currentTab === "operations" && (
-                <MemberAccountDashboard
-                  allMembers={allMembers}
-                  allTransactions={allTransactions}
-                  currentUser={loginUser}
-                  currentUserRole={currentUserRole}
-                />
+                <div className="space-y-6">
+                  {/* Subtab navigation */}
+                  <div className="flex items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl w-fit">
+                    <button
+                      type="button"
+                      onClick={() => setOperationsSubTab('caisse')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        operationsSubTab === 'caisse'
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/30'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      💰 Registre & Gestion de Caisse
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOperationsSubTab('members')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                        operationsSubTab === 'members'
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/30'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      👥 Comptes Opérationnels Membres
+                    </button>
+                  </div>
+
+                  {operationsSubTab === 'caisse' ? (
+                    <CaisseOperationsTab
+                      currentUser={loginUser}
+                      currentUserRole={currentUserRole}
+                      allMembers={allMembers}
+                      allTransactions={allTransactions}
+                    />
+                  ) : (
+                    <MemberAccountDashboard
+                      allMembers={allMembers}
+                      allTransactions={allTransactions}
+                      currentUser={loginUser}
+                      currentUserRole={currentUserRole}
+                      parametres={sysParams}
+                    />
+                  )}
+                </div>
               )}
 
               {/* Tab 7: CALENDAR PLANNER APPOINTMENTS */}
