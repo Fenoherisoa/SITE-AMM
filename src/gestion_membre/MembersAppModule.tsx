@@ -7,7 +7,7 @@ import {
   Member, Enquete, UserAccount, ActionLog,
   Transaction, CalendarEvent, OperationRequest, ChatMessage
 } from './types';
-import { FirebaseService } from './services/firebaseService';
+import { FirebaseService, requestRtdb } from './services/firebaseService';
 import { PROJECT_PREFIX, BASE_URL, base64Logo } from './constants';
 
 // Subcomponents
@@ -26,6 +26,7 @@ import SecurityTab from './components/SecurityTab';
 import ParametresTab from './components/ParametresTab';
 import LogsList from './components/LogsList';
 import SplashScreen from './components/SplashScreen';
+import MemberDetailModal from './components/MemberDetailModal';
 
 export default function MembersAppModule({ initialTab }: { initialTab?: string } = {}) {
   // --- NAVIGATION & CONTROL STATES ---
@@ -33,6 +34,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
   const [currentTab, setCurrentTab] = useState<string>(initialTab || "overview");
   const [operationsSubTab, setOperationsSubTab] = useState<'caisse' | 'members'>('caisse');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSavingMember, setIsSavingMember] = useState(false);
   const [isAppLoading, setIsAppLoading] = useState(false);
 
   // --- AUTH/SESSION STATES ---
@@ -158,9 +160,9 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     setIsAppLoading(true);
     try {
       const [
-        memberData, enqueteData, accountingData, usersData, 
-        tokensData, eventsData, logsData, opRequests, paramsData
-      ] = await Promise.all([
+        memberRes, enqueteRes, accountingRes, usersRes, 
+        tokensRes, eventsRes, logsRes, opRequestsRes, paramsRes
+      ] = await Promise.allSettled([
         FirebaseService.getMembers(),
         FirebaseService.getEnquetes(),
         FirebaseService.getAccounting(),
@@ -172,20 +174,20 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
         FirebaseService.getParametres()
       ]);
 
-      setAllMembers(memberData);
-      setAllEnquetes(enqueteData);
-      setAllTransactions(accountingData);
-      setAllUsers(usersData);
-      setTokens(tokensData);
-      setEvents(eventsData);
-      setLogs(logsData);
-      setOperationRequests(opRequests);
+      if (memberRes.status === 'fulfilled' && memberRes.value) setAllMembers(memberRes.value);
+      if (enqueteRes.status === 'fulfilled' && enqueteRes.value) setAllEnquetes(enqueteRes.value);
+      if (accountingRes.status === 'fulfilled' && accountingRes.value) setAllTransactions(accountingRes.value);
+      if (usersRes.status === 'fulfilled' && usersRes.value) setAllUsers(usersRes.value);
+      if (tokensRes.status === 'fulfilled' && tokensRes.value) setTokens(tokensRes.value);
+      if (eventsRes.status === 'fulfilled' && eventsRes.value) setEvents(eventsRes.value);
+      if (logsRes.status === 'fulfilled' && logsRes.value) setLogs(logsRes.value);
+      if (opRequestsRes.status === 'fulfilled' && opRequestsRes.value) setOperationRequests(opRequestsRes.value);
 
-      if (paramsData) {
-        setSysParams(prev => ({ ...prev, ...paramsData }));
+      if (paramsRes.status === 'fulfilled' && paramsRes.value) {
+        setSysParams(prev => ({ ...prev, ...paramsRes.value }));
       }
     } catch (e) {
-      console.error("Critical: Failed to sync database with baseamm", e);
+      console.warn("Fampitahana angon-drakitra: nisy olana kely tamin'ny fifandraisana", e);
     } finally {
       setIsAppLoading(false);
     }
@@ -198,7 +200,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     // Fast polling fallback simulation for RTDB messaging channel
     const fetchChatMessages = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/messenger.json`);
+        const res = await requestRtdb('/messenger.json');
         if (res.ok) {
           const raw = await res.json();
           if (raw) {
@@ -540,6 +542,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     };
 
     try {
+      setIsSavingMember(true);
       await FirebaseService.saveMember(updatedMember);
       await saveActionLog(
         isEditMode ? "MEMBER_MDF" : "MEMBER_ADD", 
@@ -553,6 +556,28 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     } catch (e) {
       console.error(e);
       alert("❌ Nisy olana teo am-pitehirizana ny drakitra.");
+    } finally {
+      setIsSavingMember(false);
+    }
+  };
+
+  const handleDeleteMember = async (member: Member) => {
+    if (!member.id) return;
+    try {
+      setIsAppLoading(true);
+      await FirebaseService.deleteMember(member.id);
+      await saveActionLog("MEMBER_DELETE", `Namafa mpikambana ${member.anarana} (${member.matricule})`);
+      setAllMembers(prev => prev.filter(m => m.id !== member.id));
+      if (selectedMember?.id === member.id) {
+        setSelectedMember(null);
+        setModalMemberDetail(false);
+      }
+      alert(`✅ Voafafa soa aman-tsara ny mpikambana ${member.anarana}!`);
+    } catch (e) {
+      console.error(e);
+      alert("❌ Nisy olana teo am-pamafana ny mpikambana.");
+    } finally {
+      setIsAppLoading(false);
     }
   };
 
@@ -668,7 +693,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
           statut: "PENDING"
         };
 
-        const reqResponse = await fetch(`${BASE_URL}/operationRequest.json`, {
+        const reqResponse = await requestRtdb('/operationRequest.json', {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newReq)
@@ -838,7 +863,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
       locked: true
     };
     try {
-      await fetch(`${BASE_URL}/messenger.json`, {
+      await requestRtdb('/messenger.json', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMessage)
@@ -850,7 +875,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
 
   const handleLockChatMessage = async (id: string, lock: boolean) => {
     try {
-      await fetch(`${BASE_URL}/messenger/${id}/locked.json`, {
+      await requestRtdb(`/messenger/${id}/locked.json`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(lock)
@@ -863,7 +888,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
   const handleClearAllMessages = async () => {
     if (!window.confirm("⚠️ Tena voadoroka ve ny resaka rehetra ao amin'ny messenger?")) return;
     try {
-      await fetch(`${BASE_URL}/messenger.json`, { method: "DELETE" });
+      await requestRtdb('/messenger.json', { method: "DELETE" });
       await saveActionLog("MSG_PURGE", "Nafafan'ny Administrator ny resaka Messenger rehetra.");
       alert("🧹 Madio ny resaka rehetra!");
     } catch (e) {
@@ -944,14 +969,14 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     try {
       setIsAppLoading(true);
       await Promise.all([
-        fetch(`${BASE_URL}/olona.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/enquetes.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/comptabilite.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/comptes.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/operationRequest.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/logs.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/events.json`, { method: "DELETE" }),
-        fetch(`${BASE_URL}/messenger.json`, { method: "DELETE" })
+        requestRtdb('/olona.json', { method: "DELETE" }),
+        requestRtdb('/enquetes.json', { method: "DELETE" }),
+        requestRtdb('/comptabilite.json', { method: "DELETE" }),
+        requestRtdb('/comptes.json', { method: "DELETE" }),
+        requestRtdb('/operationRequest.json', { method: "DELETE" }),
+        requestRtdb('/logs.json', { method: "DELETE" }),
+        requestRtdb('/events.json', { method: "DELETE" }),
+        requestRtdb('/messenger.json', { method: "DELETE" })
       ]);
 
       await saveActionLog("DB_PURGED", "Nandoroka sy nanamarina ny drakitra rehetra tao amin'ny server ny super-admin.");
@@ -1433,6 +1458,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
                     handleSaveMember={handleSaveMember}
                     clearMemberForm={clearMemberForm}
                     setCurrentTab={setCurrentTab}
+                    isSaving={isSavingMember}
                   />
                 </div>
               )}
@@ -1449,6 +1475,10 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
                   startEditMember={startEditMember}
                   loadAndGenerateAttestation={loadAndGenerateAttestation}
                   exportMembresPDF={exportMembresPDF}
+                  onNavigateToAdhesion={() => { clearMemberForm(); setCurrentTab("adhesion"); }}
+                  onDeleteMember={handleDeleteMember}
+                  onRefresh={loadSystemDatabase}
+                  isRefreshing={isAppLoading}
                 />
               )}
 
@@ -1574,7 +1604,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
                   currentUserRole={currentUserRole}
                   onClearLogs={async () => {
                     if (!window.confirm("⚠️ Tena voadoroka ve ny logs audit rehetra?")) return;
-                    await fetch(`${BASE_URL}/logs.json`, { method: 'DELETE' });
+                    await requestRtdb('/logs.json', { method: 'DELETE' });
                     await saveActionLog("LOGS_PURGE", "Nodiovina tanteraka ny logs systeme.");
                     await loadSystemDatabase();
                   }}
@@ -1599,78 +1629,15 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
           </div>
 
           {/* 🌟 OVERLAYS DETAIL POPUPS MODALES - MEMBER DETAILS */}
-          {modalMemberDetail && selectedMember && (
-            <div className="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in font-sans">
-              <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden animate-zoom-in border border-slate-100 flex flex-col max-h-[90vh]">
-                <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between text-white select-none">
-                  <span className="text-xs font-bold uppercase tracking-widest bg-indigo-800 px-2.5 py-1 rounded-full">
-                    {selectedMember.matricule}
-                  </span>
-                  <h3 className="font-extrabold text-sm uppercase">Mombamomba ny Mpikambana</h3>
-                  <button onClick={() => setModalMemberDetail(false)} className="hover:opacity-75 transition-all text-white cursor-pointer">
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <div className="p-6 overflow-y-auto space-y-4 flex-1">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Anarana feno</span>
-                      <span className="font-bold text-slate-800 text-sm">{selectedMember.anarana || '---'}</span>
-                    </div>
-
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Laharana finday</span>
-                      <span className="font-bold text-slate-800 text-sm">{selectedMember.telephone || '---'}</span>
-                    </div>
-
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Karatra CIN / Date d'obtention</span>
-                      <span className="font-bold text-slate-800 text-sm">
-                        {selectedMember.cin || '---'} {selectedMember.date_delivrance ? `(Délivré le ${selectedMember.date_delivrance})` : ''}
-                      </span>
-                    </div>
-
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Tetikasa / Projet</span>
-                      <span className="font-bold text-indigo-600 text-sm uppercase">{selectedMember.tetikasa || '---'}</span>
-                    </div>
-
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Date d'Adhésion</span>
-                      <span className="font-bold text-slate-800 text-sm">{selectedMember.date_adhesion || '---'}</span>
-                    </div>
-
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Fiaviana (Faritra, Kaominina, Fokontany)</span>
-                      <span className="font-bold text-slate-800 text-sm">
-                        {selectedMember.province || '---'} • {selectedMember.region || '---'} • {selectedMember.commune || '---'} • {selectedMember.fokontany || '---'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-end gap-3 select-none">
-                  <button 
-                    onClick={() => {
-                      loadAndGenerateAttestation(selectedMember, 'Adhesion');
-                      setModalMemberDetail(false);
-                    }}
-                    className="p-2 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Printer className="h-4 w-4" />
-                    <span>Printy Certificat</span>
-                  </button>
-                  <button 
-                    onClick={() => setModalMemberDetail(false)} 
-                    className="p-2 py-2 px-4 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs rounded-lg transition-all cursor-pointer"
-                  >
-                    Hakatona
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <MemberDetailModal
+            isOpen={modalMemberDetail}
+            member={selectedMember}
+            onClose={() => setModalMemberDetail(false)}
+            onEdit={startEditMember}
+            onPrintAttestation={loadAndGenerateAttestation}
+            onDelete={handleDeleteMember}
+            linkedEnquete={selectedMember ? allEnquetes.find(e => e.matricule_olona === selectedMember.matricule) : null}
+          />
 
           {/* 🌟 OVERLAYS DETAIL POPUPS MODALES - ENQUETE DETAILS */}
           {modalEnqueteDetail && selectedEnquete && (

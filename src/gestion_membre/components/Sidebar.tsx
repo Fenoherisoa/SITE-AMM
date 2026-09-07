@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   BarChart2, UserPlus, FileText, CheckSquare, Landmark, 
-  Terminal, ShieldCheck, Mail, Calendar, Settings, LogOut, X, Clock, HelpCircle
+  Terminal, ShieldCheck, Mail, Calendar, Settings, LogOut, X, Clock, HelpCircle, History
 } from 'lucide-react';
 
 interface Props {
@@ -36,7 +36,7 @@ export default function Sidebar({
     { id: "enquetes", label: "Enquêtes", icon: CheckSquare, perm: userPermissions.enquetes },
     { id: "accounting", label: "Comptabilité", icon: Landmark, perm: userPermissions.accounting },
     { id: "operations", label: "Opérations / Caisse", icon: Clock, perm: userPermissions.operations },
-    { id: "historiquetrans", label: "Transactions", icon: HistoryIcon, perm: userPermissions.historiquetrans || true },
+    { id: "historiquetrans", label: "Transactions", icon: History, perm: userPermissions.historiquetrans || true },
     { id: "historique", label: "Logs", icon: Terminal, perm: userPermissions.historique },
     { id: "calendar", label: "Calendrier", icon: Calendar, perm: userPermissions.calendar },
     { id: "messenger", label: "Messenger", icon: Mail, perm: userPermissions.messenger, badge: unreadCount },

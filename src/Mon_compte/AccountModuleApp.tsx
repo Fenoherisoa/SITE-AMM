@@ -14,7 +14,6 @@ import { TransactionModal } from './components/TransactionModal';
 import { TransactionHistory } from './components/TransactionHistory';
 import logo from './assets/logo.png';
 import logo2 from './assets/logo2.png';
-import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 import { 
   ShieldAlert, Landmark, Smartphone, KeyRound, ArrowRightLeft, 

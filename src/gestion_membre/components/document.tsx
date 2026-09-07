@@ -1,9 +1,10 @@
 import { BASE_URL, base64Logo } from '../constants';
+import { requestRtdb } from '../services/firebaseService';
 
 const saveDossierToHistory = async (mem: any, _info: any, typeDossier: string): Promise<string> => {
   const numDossier = `AMM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   try {
-    await fetch(`${BASE_URL}/dossiers.json`, {
+    await requestRtdb('/dossiers.json', {
       method: 'POST',
       body: JSON.stringify({
         numero: numDossier,
@@ -74,8 +75,8 @@ export const loadAndGenerateAttestation = async (item: any, typeDossier = 'Attes
       
       try {
           const [memberRes, assoRes] = await Promise.all([
-              fetch(`${BASE_URL}/olona/${memberId}.json`),
-              fetch(`${BASE_URL}/parametres.json`)
+              requestRtdb(`/olona/${memberId}.json`),
+              requestRtdb('/parametres.json')
           ]);
 
           const mem = await memberRes.json();

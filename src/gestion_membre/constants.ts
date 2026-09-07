@@ -1,4 +1,4 @@
-export const BASE_URL = "https://baseamm-9c2c7-default-rtdb.europe-west1.firebasedatabase.app/";
+export const BASE_URL = "https://baseamm-9c2c7-default-rtdb.europe-west1.firebasedatabase.app";
 
 export const PROJECT_PREFIX: Record<string, string> = {
   "VAROTRA": "V",

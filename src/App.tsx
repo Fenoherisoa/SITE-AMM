@@ -73,20 +73,20 @@ export default function App() {
       const fetchData = async () => {
         setLoadingData(true);
         try {
-          const [memData, enqData, accData, logData, evData] = await Promise.all([
+          const [memRes, enqRes, accRes, logRes, evRes] = await Promise.allSettled([
             FirebaseService.getMembers(),
             FirebaseService.getEnquetes(),
             FirebaseService.getAccounting(),
             FirebaseService.getLogs(),
             FirebaseService.getEvents()
           ]);
-          setMembers(memData);
-          setEnquetes(enqData);
-          setTransactions(accData);
-          setLogs(logData);
-          setEvents(evData);
+          setMembers(memRes.status === 'fulfilled' ? memRes.value : []);
+          setEnquetes(enqRes.status === 'fulfilled' ? enqRes.value : []);
+          setTransactions(accRes.status === 'fulfilled' ? accRes.value : []);
+          setLogs(logRes.status === 'fulfilled' ? logRes.value : []);
+          setEvents(evRes.status === 'fulfilled' ? evRes.value : []);
         } catch (error) {
-          console.error("Erreur lors du chargement des données depuis Firebase:", error);
+          console.warn("Fampandrenesana: Tsy nahomby ny fampitahana ny angon-drakitra Firebase:", error);
         } finally {
           setLoadingData(false);
         }

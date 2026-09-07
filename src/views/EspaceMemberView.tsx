@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PageRoute, UserMetadata } from '../types';
-import { MemberManagement } from '../components/MemberManagement';
+import MembersAppModule from '../gestion_membre/MembersAppModule';
 import { Shield, User, FileText, Calendar, KeyRound, LogOut, CheckCircle2, Lock, Users, Award } from 'lucide-react';
 
 interface EspaceMemberViewProps {
@@ -228,7 +228,9 @@ export const EspaceMemberView: React.FC<EspaceMemberViewProps> = ({
           )}
 
           {activeTab === 'members' && canManageMembers && (
-            <MemberManagement currentUser={currentUser} />
+            <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+              <MembersAppModule initialTab="members" />
+            </div>
           )}
 
           {activeTab === 'documents' && (

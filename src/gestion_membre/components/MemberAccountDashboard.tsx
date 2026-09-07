@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Search, Printer, Database, ArrowUpRight, ArrowDownLeft, UserCheck } from 'lucide-react';
 import { Transaction, Member } from '../types';
-import { BASE_URL } from '../services/firebaseService';
+import { BASE_URL, requestRtdb } from '../services/firebaseService';
 
 interface Props {
   allMembers: Member[];
@@ -39,7 +39,7 @@ export default function MemberAccountDashboard({
   useEffect(() => {
     if (selectedMatricule) {
       setMemberAccount(null);
-      fetch(`${BASE_URL}/comptes/${selectedMatricule}.json`)
+      requestRtdb(`/comptes/${selectedMatricule}.json`)
         .then(res => res.json())
         .then(val => {
           setMemberAccount(val || { solde: 0, solde_credit: 0, solde_debit: 0 });

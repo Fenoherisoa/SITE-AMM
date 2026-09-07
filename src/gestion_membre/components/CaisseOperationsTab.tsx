@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { BASE_URL } from '../services/firebaseService';
+import { BASE_URL, requestRtdb } from '../services/firebaseService';
 
 export interface CaisseMovement {
   id: string;
@@ -109,7 +109,7 @@ export default function CaisseOperationsTab({
   const loadCaisseData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/caisse_operations.json`);
+      const res = await requestRtdb('/caisse_operations.json');
       const data = await res.json();
       if (data) {
         const loadedOps: CaisseMovement[] = Object.entries(data).map(([id, val]: [string, any]) => ({
@@ -273,7 +273,7 @@ export default function CaisseOperationsTab({
     };
 
     try {
-      const res = await fetch(`${BASE_URL}/caisse_operations.json`, {
+      const res = await requestRtdb('/caisse_operations.json', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOp)
@@ -282,7 +282,7 @@ export default function CaisseOperationsTab({
       
       // Also sync to general transactions for accounting consistency
       try {
-        await fetch(`${BASE_URL}/transactions.json`, {
+        await requestRtdb('/transactions.json', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -320,7 +320,7 @@ export default function CaisseOperationsTab({
   const handleDeleteOperation = async (id: string) => {
     if (!window.confirm('Voulez-vous vraiment annuler/supprimer cette opération de caisse ?')) return;
     try {
-      await fetch(`${BASE_URL}/caisse_operations/${id}.json`, { method: 'DELETE' });
+      await requestRtdb(`/caisse_operations/${id}.json`, { method: 'DELETE' });
       setNotification({ type: 'success', text: 'Opération supprimée du registre de caisse.' });
       await loadCaisseData();
     } catch (e) {
