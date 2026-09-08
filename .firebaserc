@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "baseamm-9c2c7": {
+      "hosting": {
+        "site-ass": [
+          "ass-malagasymiray"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
