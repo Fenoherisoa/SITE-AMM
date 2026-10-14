@@ -158,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
                     currency === 'MGA' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  MGA (Ar)
+                  MGA
                 </button>
                 <button
                   onClick={() => setCurrency('EUR')}

@@ -86,7 +86,7 @@ export default function App() {
   // System general config parameters
   const [sysParams, setSysParams] = useState({
     appName: "AMM CONNECT",
-    currency: "Ar",
+    currency: "MGA",
     adminContact: "+261 34 29 845 23",
     alertThreshold: 15,
     logoBase64: base64Logo
@@ -593,7 +593,7 @@ export default function App() {
       const account = await FirebaseService.getMemberAccount(trans.matricule) || { solde: 0, solde_credit: 0, solde_debit: 0 };
       
       if (trans.karazana === 'MIVOAKA' && account.solde < trans.vola) {
-        alert("❌ Tsy ampy ny solde ao amin'ny kaonty hanaovana ity retrait ity! (Solde: " + account.solde + " Ar)");
+        alert("❌ Tsy ampy ny solde ao amin'ny kaonty hanaovana ity retrait ity! (Solde: " + account.solde + " MGA)");
         setIsAppLoading(false);
         return;
       }
@@ -626,7 +626,7 @@ export default function App() {
         });
 
         if (reqResponse.ok) {
-          alert("⏳ Opération de " + trans.vola + " Ar nahemotra ho fankatoavana amin'ny Contrôle 72H.");
+          alert("⏳ Opération de " + trans.vola + " MGA nahemotra ho fankatoavana amin'ny Contrôle 72H.");
           await saveActionLog("TRANSACT_PENDING", `Fangatahana mouvement 72H ho an'i ${trans.memberName}`);
         }
       } else {
@@ -652,7 +652,7 @@ export default function App() {
           solde_debit: updatedDebit
         });
 
-        await saveActionLog("TRANSACT_OK", `Mouvement de Caisse voatahiry ho an'i ${trans.memberName} (${trans.karazana} : ${trans.vola} Ar)`);
+        await saveActionLog("TRANSACT_OK", `Mouvement de Caisse voatahiry ho an'i ${trans.memberName} (${trans.karazana} : ${trans.vola} MGA)`);
         alert("📥 Operation voarakitra soa aman-tsara!");
       }
 
@@ -1140,7 +1140,7 @@ export default function App() {
         <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; font-size: 12px;">${t.memberName} (${t.matricule})</td>
         <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-align: center; font-weight: bold; color: ${t.karazana === 'MIDITRA' ? '#15803d' : '#b45309'};">${t.karazana}</td>
         <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #475569;">${t.motif || '---'} (${t.operator || 'Admin'})</td>
-        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; font-weight: bold; text-align: right; color: ${t.karazana === 'MIDITRA' ? 'green' : 'red'};">${t.karazana === 'MIDITRA' ? '+' : '-'} ${t.vola.toLocaleString()} Ar</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; font-weight: bold; text-align: right; color: ${t.karazana === 'MIDITRA' ? 'green' : 'red'};">${t.karazana === 'MIDITRA' ? '+' : '-'} ${t.vola.toLocaleString()} MGA</td>
       </tr>
     `).join("");
 
@@ -1173,15 +1173,15 @@ export default function App() {
           <div class="recap-box">
             <div class="recap-item">
               <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; color: #64748b;">Flux Global d'Entrées</span>
-              <div class="recap-val" style="color: #15803d;">+ ${miditraTotal.toLocaleString()} Ar</div>
+              <div class="recap-val" style="color: #15803d;">+ ${miditraTotal.toLocaleString()} MGA</div>
             </div>
             <div class="recap-item">
               <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; color: #64748b;">Flux Global de Sorties</span>
-              <div class="recap-val" style="color: #b45309;">- ${mivoakaTotal.toLocaleString()} Ar</div>
+              <div class="recap-val" style="color: #b45309;">- ${mivoakaTotal.toLocaleString()} MGA</div>
             </div>
             <div class="recap-item">
               <span style="font-size: 10px; text-transform: uppercase; font-weight: bold; color: #64748b;">Solde Net Trésorerie AMM</span>
-              <div class="recap-val" style="color: #0d3373;">${balance.toLocaleString()} Ar</div>
+              <div class="recap-val" style="color: #0d3373;">${balance.toLocaleString()} MGA</div>
             </div>
           </div>
 
@@ -1623,7 +1623,7 @@ export default function App() {
 
                     <div className="p-3 bg-slate-50 rounded-lg">
                       <span className="text-slate-400 font-bold uppercase tracking-wider block mb-1">Fidiram-bola isan-karazany (MGA)</span>
-                      <span className="font-bold text-slate-800 text-sm">{selectedEnquete.fidiram_bola ? `${Number(selectedEnquete.fidiram_bola).toLocaleString()} Ar` : '---'}</span>
+                      <span className="font-bold text-slate-800 text-sm">{selectedEnquete.fidiram_bola ? `${Number(selectedEnquete.fidiram_bola).toLocaleString()} MGA` : '---'}</span>
                     </div>
 
                     <div className="p-3 bg-slate-50 rounded-lg">

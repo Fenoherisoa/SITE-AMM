@@ -62,9 +62,9 @@ export default function ParametresTab({
 
   // Currency & Financial Rules
   const [formCurrency, setFormCurrency] = useState("MGA");
-  const [formCurrencySymbol, setFormCurrencySymbol] = useState("Ar");
-  const [formAlertThreshold, setFormAlertThreshold] = useState("500000"); // 500k Ar
-  const [formCotisationAnnuelle, setFormCotisationAnnuelle] = useState("20000"); // 20k Ar
+  const [formCurrencySymbol, setFormCurrencySymbol] = useState("MGA");
+  const [formAlertThreshold, setFormAlertThreshold] = useState("500000"); // 500 000 MGA
+  const [formCotisationAnnuelle, setFormCotisationAnnuelle] = useState("20000"); // 20 000 MGA
 
   // Social Links & Web
   const [formFacebook, setFormFacebook] = useState("https://facebook.com/associationmalagasymiray");
@@ -646,7 +646,7 @@ export default function ParametresTab({
                   value={formCurrency}
                   onChange={(e) => {
                     setFormCurrency(e.target.value);
-                    if (e.target.value === 'MGA') setFormCurrencySymbol('Ar');
+                    if (e.target.value === 'MGA') setFormCurrencySymbol('MGA');
                     else if (e.target.value === 'EUR') setFormCurrencySymbol('€');
                     else if (e.target.value === 'USD') setFormCurrencySymbol('$');
                   }}
@@ -669,7 +669,7 @@ export default function ParametresTab({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-slate-300 font-semibold">Seuil d'Alerte Trésorerie Basse (Ar)</label>
+                <label className="text-slate-300 font-semibold">Seuil d'Alerte Trésorerie Basse (MGA)</label>
                 <input
                   type="number"
                   disabled={!isEditing}
@@ -681,7 +681,7 @@ export default function ParametresTab({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-slate-300 font-semibold">Cotisation Annuelle de Base (Ar)</label>
+                <label className="text-slate-300 font-semibold">Cotisation Annuelle de Base (MGA)</label>
                 <input
                   type="number"
                   disabled={!isEditing}

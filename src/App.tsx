@@ -21,6 +21,7 @@ import { FirebaseService } from './services/firebaseService'; // Ahitsio ny lala
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { DashboardMenu } from './components/DashboardMenu';
+import { SyncCenterModal } from './offline/components/SyncCenterModal';
 
 
 import { HomeView } from './views/HomeView';
@@ -212,7 +213,7 @@ export default function App() {
                       ← Retour au Menu Principal du Site
                     </button>
                   </div>
-                  <RHAppModule />
+                  <RHAppModule initialRoute={activeModule === 'payroll' ? '/payroll' : '/'} />
                 </div>
               </RHAuthProvider>
             </BrowserRouter>
@@ -222,19 +223,17 @@ export default function App() {
         if (activeModule === 'leaves') {
           return (
             <BrowserRouter>
-              <CongeAuthProvider>
-                <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
-                    <button
-                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
-                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
-                    >
-                      ← Retour au Menu Principal du Site
-                    </button>
-                  </div>
-                  <Moduleconge />
+              <div className="w-full">
+                <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                  <button
+                    onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                  >
+                    ← Retour au Menu Principal du Site
+                  </button>
                 </div>
-              </CongeAuthProvider>
+                <Moduleconge />
+              </div>
             </BrowserRouter>
           );
         }
@@ -294,6 +293,25 @@ export default function App() {
                 </div>
               </CptAuthProvider>
             </BrowserRouter>
+          );
+        }
+
+        if (activeModule === 'sync') {
+          return (
+            <div className="w-full">
+              <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                <button
+                  onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                >
+                  ← Retour au Menu Principal du Site
+                </button>
+              </div>
+              <SyncCenterModal
+                isOpen={true}
+                onClose={() => setActiveModule(null)}
+              />
+            </div>
           );
         }
 

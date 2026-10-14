@@ -134,7 +134,7 @@ export default function TransactionsFormAndLog({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 block mb-1">Sorabola (Ar) *</label>
+            <label className="text-xs font-semibold text-slate-700 block mb-1">Sorabola (MGA) *</label>
             <input
               type="number"
               value={vola}
@@ -211,7 +211,7 @@ export default function TransactionsFormAndLog({
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Request {req.type} : <span className="font-semibold text-indigo-600">{req.montant.toLocaleString()} Ar</span> • {req.motif}
+                    Request {req.type} : <span className="font-semibold text-indigo-600">{req.montant.toLocaleString()} MGA</span> • {req.motif}
                   </p>
                   <p className="text-[10px] text-slate-400 mt-0.5">
                     Créé par: {req.operator || 'Admin'} • le {new Date(req.createdAt).toLocaleString()}
@@ -309,7 +309,7 @@ export default function TransactionsFormAndLog({
                     <td className={`p-3 text-xs font-bold text-right whitespace-nowrap ${
                       t.karazana === 'MIDITRA' ? 'text-emerald-600' : 'text-rose-600'
                     }`}>
-                      {t.karazana === 'MIDITRA' ? '+' : '-'} {t.vola.toLocaleString()} Ar
+                      {t.karazana === 'MIDITRA' ? '+' : '-'} {t.vola.toLocaleString()} MGA
                     </td>
                     <td className="p-3 text-center">
                       <button

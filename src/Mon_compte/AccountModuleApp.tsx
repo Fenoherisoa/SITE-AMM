@@ -76,14 +76,7 @@ export default function App() {
     }
   }, [toast]);
 
-  useEffect(() => {
-    const handleDoubleClick = () => {
-      setShowNav(prev => !prev);
-    };
 
-    document.addEventListener('dblclick', handleDoubleClick);
-    return () => document.removeEventListener('dblclick', handleDoubleClick);
-  }, []);
 
   // 1. Splash Timer
   useEffect(() => {
@@ -97,9 +90,23 @@ export default function App() {
           setStep('main');
         });
       } else {
+        try {
+          const central = localStorage.getItem('amm_authenticated_user');
+          if (central) {
+            const u = JSON.parse(central);
+            const mat = (u.linkedEmployeeId || u.cin || 'AMM-0001').toUpperCase().trim();
+            setMatricule(mat);
+            localStorage.setItem('amm_matricule', mat);
+            localStorage.setItem('amm_loggedIn', 'true');
+            syncAccountData(mat).then(() => {
+              setStep('main');
+            });
+            return;
+          }
+        } catch {}
         setStep('language');
       }
-    }, 2500);
+    }, 1500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -829,7 +836,7 @@ export default function App() {
           </div>
           
           {/* HEADER / NAVIGATION SIDEBAR (DESKTOP ONLY) */}
-          <aside className="hidden md:flex w-full md:w-64 bg-brand-card border-b md:border-b-0 md:border-r border-brand-border shrink-0 flex-col justify-between pt-6 pb-4 select-none">
+          <aside className="hidden md:flex w-full md:w-64 bg-brand-card border-b md:border-b-0 md:border-r border-brand-border shrink-0 flex-col justify-between pt-6 pb-4 select-none md:sticky md:top-0 md:max-h-screen md:overflow-y-auto custom-scrollbar">
             
             <div className="space-y-6">
               {/* Sidebar Branding Header */}
@@ -848,7 +855,7 @@ export default function App() {
                   <span className="text-[10px] text-brand-accent font-mono">Mobile & Web Portal</span>
                 </div>
               </div>
--
+
               {/* Live Navigation Tabs */}
               <nav className="space-y-1 px-3">
                 {[
@@ -862,7 +869,7 @@ export default function App() {
                     key={item.id}
                     type="button"
                     onClick={() => setCurrentTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-xs font-bold transition-all ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
                       currentTab === item.id
                         ? 'bg-brand-accent/10 text-brand-accent border-l-4 border-brand-accent'
                         : 'text-brand-text-sub hover:bg-brand-border/20 hover:text-brand-text'
@@ -900,7 +907,7 @@ export default function App() {
                       selectLanguage(next[lang]);
                     }}
                     type="button"
-                    className="p-2.5 bg-brand-border/10 hover:bg-brand-border hover:text-brand-accent text-brand-text-sub rounded-xl border border-brand-border/50 transition-all text-xs flex items-center gap-1.5"
+                    className="p-2.5 bg-brand-border/10 hover:bg-brand-border hover:text-brand-accent text-brand-text-sub rounded-xl border border-brand-border/50 transition-all text-xs flex items-center gap-1.5 cursor-pointer"
                     title="Toggle Language"
                   >
                     <Languages size={14} />
@@ -911,7 +918,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleLogOutPortal}
-                  className="flex-1 p-2.5 bg-brand-red/10 border border-brand-red/20 text-brand-red font-bold text-xs rounded-xl hover:bg-brand-red hover:text-brand-bg transition flex items-center justify-center gap-1"
+                  className="flex-1 p-2.5 bg-brand-red/10 border border-brand-red/20 text-brand-red font-bold text-xs rounded-xl hover:bg-brand-red hover:text-brand-bg transition flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <LogOut size={13} />
                   <span>{t.logout}</span>
@@ -922,7 +929,7 @@ export default function App() {
           </aside>
 
           {/* MAIN DATA CENTER PANEL */}
-          <main className="flex-1 p-4 md:p-8 space-y-6 overflow-y-auto no-scrollbar max-h-screen">
+          <main className="flex-1 p-4 md:p-8 space-y-6 overflow-y-auto custom-scrollbar">
             
             {/* Top Toolbar with quick indicator stats and sync clocks */}
             <header className="flex justify-between items-center pb-4 border-b border-brand-border/60">

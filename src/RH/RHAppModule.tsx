@@ -1,5 +1,5 @@
-// src/RHAppModule.tsx
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { Layout } from './components/Layout' 
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { DashboardPage } from './pages/DashboardPage'
@@ -18,7 +18,15 @@ import { AproposPage } from './pages/AproposPage'
 // Ampidiro eto ny pejinao ho an'ny Login (Ovay ny path raha ilaina)
 import { LoginPage } from './pages/LoginPage' 
 
-export default function RHAppModule() {
+export default function RHAppModule({ initialRoute }: { initialRoute?: string }) {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (initialRoute && initialRoute !== '/') {
+      navigate(initialRoute, { replace: true })
+    }
+  }, [initialRoute, navigate])
+
   return (
     <Routes>
       {/* 1. LALANA TSY VOAARO (Azo idirana avy hatrany) */}

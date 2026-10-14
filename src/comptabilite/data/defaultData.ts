@@ -40,19 +40,19 @@ export const JOURNAL_TYPES: JournalInfo[] = [
 ];
 
 export const INITIAL_COMPANY_CONFIG: CompanyConfig = {
-  name: 'SITE-AMM SARL',
-  legalForm: 'Société à Responsabilité Limitée',
-  taxId: 'NIF-9847201938-A',
-  rccm: 'RCCM-2024-B-84920',
-  address: '128 Boulevard du 13 Janvier, Immeuble AMM',
-  phone: '+228 90 12 34 56',
-  email: 'comptabilite@site-amm.com',
-  currency: 'FCFA',
-  currencySymbol: 'FCFA',
+  name: 'ASSOCIATION MALAGASY MIRAY (AMM)',
+  legalForm: 'Association à but non lucratif / SARL Sociale',
+  taxId: 'NIF-4001289345',
+  rccm: 'STAT-94991 11 2022 0 10023',
+  address: 'Lot 4 11 58, Ambatondrazaka, Madagascar',
+  phone: '+261 34 86 115 36',
+  email: 'associationmalagasymiray@gmail.com',
+  currency: 'MGA',
+  currencySymbol: 'MGA',
   fiscalYear: '2026',
   fiscalYearStart: '2026-01-01',
   fiscalYearEnd: '2026-12-31',
-  vatRate: 18,
+  vatRate: 20,
   isClosed: false,
 };
 

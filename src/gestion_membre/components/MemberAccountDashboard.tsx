@@ -132,7 +132,7 @@ export default function MemberAccountDashboard({
                 <th>ID Opération</th>
                 <th>Nature</th>
                 <th>Désignation / Motif</th>
-                <th style="text-align:right">Montant (Ar)</th>
+                <th style="text-align:right">Montant (MGA)</th>
               </tr>
             </thead>
             <tbody>
@@ -150,7 +150,7 @@ export default function MemberAccountDashboard({
               <tr class="total-row">
                 <td colspan="4" style="text-align:right">TOTAL DES OPÉRATIONS SÉLECTIONNÉES</td>
                 <td style="text-align:right;color:#0d3373;font-size:13px">
-                  ${toPrint.reduce((acc, t) => acc + (t.karazana === 'MIDITRA' ? t.vola : -t.vola), 0).toLocaleString()} Ar
+                  ${toPrint.reduce((acc, t) => acc + (t.karazana === 'MIDITRA' ? t.vola : -t.vola), 0).toLocaleString()} MGA
                 </td>
               </tr>
             </tbody>
@@ -229,7 +229,7 @@ export default function MemberAccountDashboard({
           <div>
             <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Total Miditra</span>
             <h4 className="text-sm font-bold text-emerald-900">
-              {memberAccount ? accountData.miditra.toLocaleString() : "..."} Ar
+              {memberAccount ? accountData.miditra.toLocaleString() : "..."} MGA
             </h4>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function MemberAccountDashboard({
           <div>
             <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Total Mivoaka</span>
             <h4 className="text-sm font-bold text-rose-900">
-              {memberAccount ? accountData.mivoaka.toLocaleString() : "..."} Ar
+              {memberAccount ? accountData.mivoaka.toLocaleString() : "..."} MGA
             </h4>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function MemberAccountDashboard({
           <div>
             <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Solde Actuel</span>
             <h4 className="text-sm font-bold text-slate-900">
-              {memberAccount ? accountData.net.toLocaleString() : "..."} Ar
+              {memberAccount ? accountData.net.toLocaleString() : "..."} MGA
             </h4>
           </div>
         </div>
@@ -318,10 +318,10 @@ export default function MemberAccountDashboard({
                 <td className={`p-3 font-bold text-right whitespace-nowrap ${
                   t.karazana === 'MIDITRA' ? 'text-emerald-600' : 'text-rose-600'
                 }`}>
-                  {t.karazana === 'MIDITRA' ? '+' : '-'} {t.vola.toLocaleString()} Ar
+                  {t.karazana === 'MIDITRA' ? '+' : '-'} {t.vola.toLocaleString()} MGA
                 </td>
                 <td className="p-3 font-semibold text-right text-slate-700 whitespace-nowrap">
-                  {t.currentBalance?.toLocaleString()} Ar
+                  {t.currentBalance?.toLocaleString()} MGA
                 </td>
               </tr>
             ))}

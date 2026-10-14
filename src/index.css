@@ -1,14 +1,5 @@
 @import "tailwindcss";
-
-@layer base {
-  body {
-    background-color: #FDFDFC;
-    color: #1A202C;
-  }
-}
-
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-@import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -29,17 +20,109 @@
   --color-brand-border: #1E2F50;
 }
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #FDFDFC;
+    color: #1A202C;
+    user-select: text;
+    -webkit-user-select: text;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* Interactive elements pointer cursor */
+  button, 
+  [role="button"], 
+  select, 
+  input[type="checkbox"], 
+  input[type="radio"], 
+  input[type="button"], 
+  input[type="submit"], 
+  a {
+    cursor: pointer;
+  }
+
+  /* Preserve text selection on all content and tables */
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
+/* Modern clean scrollbars for desktop & responsive scroll areas */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.75);
+}
+
+/* Firefox standard scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Dark mode scrollbars */
+.dark ::-webkit-scrollbar-thumb,
+.bg-slate-950 ::-webkit-scrollbar-thumb,
+.bg-slate-900 ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+.bg-slate-950 ::-webkit-scrollbar-thumb:hover,
+.bg-slate-900 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
 @layer utilities {
-  /* Hide scrollbar for Chrome, Safari and Opera */
+  /* Hide scrollbar utility when explicitly requested */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
+  /* Visible modern scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.7);
+  }
+
   /* Safe area helpers for notches & home bars on Android/iOS */
   .pt-safe {
     padding-top: env(safe-area-inset-top, 0px);
@@ -53,24 +136,6 @@
   }
   .min-h-screen-safe {
     min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-  }
-}
-
-/* Base mobile overrides to feel like native applets on iOS / Android */
-@layer base {
-  html, body {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    overscroll-behavior-y: contain;
-    overflow-x: hidden;
-  }
-  
-  /* Re-enable selection specifically for inputs/textareas to allow keyboard inputting and clipboard copy */
-  input, textarea, [contenteditable="true"] {
-    -webkit-user-select: text;
-    user-select: text;
   }
 }
 

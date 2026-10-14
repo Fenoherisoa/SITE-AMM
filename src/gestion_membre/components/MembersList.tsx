@@ -508,8 +508,8 @@ export default function MembersList({
         )}
 
         {/* 5. MEMBERS DATA TABLE (Desktop & Tablet) */}
-        <div className="hidden md:block overflow-hidden border border-slate-200 rounded-xl">
-          <table className="w-full text-left border-collapse">
+        <div className="hidden md:block overflow-x-auto border border-slate-200 rounded-xl custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[760px]">
             <thead>
               <tr className="bg-slate-900 text-white text-[11px] uppercase tracking-wider font-bold select-none">
                 <th className="py-3 px-4 w-[16%]">Matricule & ID</th>

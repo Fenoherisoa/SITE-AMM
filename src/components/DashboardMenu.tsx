@@ -7,7 +7,8 @@ import {
   Settings, 
   Truck, 
   Calculator, 
-  ShieldAlert 
+  ShieldAlert,
+  Radio
 } from 'lucide-react';
 import { UserMetadata } from '../types';
 
@@ -70,6 +71,13 @@ export const DashboardMenu: React.FC<DashboardMenuProps> = ({ user, onSelectModu
       show: true
     },
     {
+      key: 'sync',
+      title: 'Synchronisation & Réseau Local',
+      description: 'État hors ligne, synchronisation 24h Firebase et serveur Wi-Fi local sans Internet.',
+      icon: <Radio className="w-12 h-12 text-teal-600" />,
+      show: true
+    },
+    {
       key: 'account',
       title: 'Mon Compte',
       description: 'Mise à jour de vos informations personnelles et de votre mot de passe.',
@@ -103,7 +111,7 @@ export const DashboardMenu: React.FC<DashboardMenuProps> = ({ user, onSelectModu
             <button
               key={item.key}
               onClick={() => onSelectModule(item.key)}
-              className="flex flex-col items-start p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-emerald-500 transition-all text-left group"
+              className="flex flex-col items-start p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-emerald-500 transition-all text-left group cursor-pointer"
             >
               <div className="p-4 bg-gray-50 rounded-xl group-hover:bg-emerald-50 transition-colors mb-4">
                 {item.icon}

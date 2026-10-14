@@ -2,11 +2,12 @@ import { CurrencyCode, StockStatus } from '../types';
 
 export const FORMAT_CURRENCY = (amount: number, currency: CurrencyCode = 'MGA'): string => {
   if (isNaN(amount) || amount === null || amount === undefined) {
-    return `0 ${currency === 'MGA' ? 'Ar' : currency}`;
+    return `0 ${currency}`;
   }
 
   if (currency === 'MGA') {
-    return `${Math.round(amount).toLocaleString('fr-FR')} Ar`;
+    const formatted = Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return `${formatted} MGA`;
   }
 
   if (currency === 'EUR') {
@@ -27,14 +28,6 @@ export const FORMAT_CURRENCY = (amount: number, currency: CurrencyCode = 'MGA'):
       currency: 'USD',
       maximumFractionDigits: 2,
     }).format(usdVal);
-  }
-
-  if (currency === 'XOF') {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      maximumFractionDigits: 0,
-    }).format(amount).replace('CFA', 'FCFA');
   }
 
   return `${amount.toLocaleString('fr-FR')} ${currency}`;

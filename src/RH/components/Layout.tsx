@@ -17,10 +17,11 @@ const baseNavItems = [
 ]
 
 export const Layout = () => {
-  const { user, signOut, permissions } = useAuth()
+  const { user, signOut, permissions, isAdmin } = useAuth()
 
   const navItems = baseNavItems.filter((item) => {
-    if (item.to === '/'|| item.to === '/apropos') return true
+    if (item.to === '/' || item.to === '/apropos') return true
+    if (isAdmin) return true
     return Boolean(permissions[item.permission])
   })
 

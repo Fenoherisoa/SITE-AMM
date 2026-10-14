@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { translations } from '../i18n';
 import { Language, MobileOperator, OperationType } from '../types';
 import { dbService } from '../dbService';
@@ -185,6 +185,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const OPERATEURS = [
     { name: 'Mvola' as MobileOperator, color: 'Green', dotColor: 'bg-brand-green', pillClass: 'border-brand-green/20 text-brand-green hover:bg-brand-green/10' },
     { name: 'Orange Money' as MobileOperator, color: 'Orange', dotColor: 'bg-orange-500', pillClass: 'border-orange-500/20 text-orange-200 hover:bg-orange-950/30' },
@@ -192,11 +200,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div id="operation_modal_card" className="w-full max-w-lg bg-brand-card border border-brand-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        id="operation_modal_card" 
+        className="w-full max-w-lg bg-brand-card border border-brand-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        onClick={e => e.stopPropagation()}
+      >
         
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-brand-border bg-brand-card-alt">
+        <div className="flex items-center justify-between p-4 border-b border-brand-border bg-brand-card-alt select-none">
           <div className="flex items-center gap-2">
             <span className="text-2xl">
               {type === 'depot' ? '⬆️' : type === 'retrait' ? '⬇️' : '↔️'}
@@ -208,14 +223,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <button 
             type="button" 
             onClick={onClose} 
-            className="p-1 px-2 text-brand-muted hover:text-brand-accent hover:bg-brand-border rounded-lg transition"
+            className="p-1.5 text-brand-muted hover:text-brand-accent hover:bg-brand-border rounded-lg transition cursor-pointer"
+            title="Fermer (Échap)"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Modal Content Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 flex-1">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto custom-scrollbar space-y-4 flex-1">
           {errorMsg && (
             <div className="p-3 bg-brand-red/10 border border-brand-red/30 rounded-lg flex items-start gap-2 text-brand-red text-sm">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" />

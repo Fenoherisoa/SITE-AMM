@@ -96,7 +96,7 @@ export const EmployeeDetailPage = () => {
             <p><span className="text-slate-500">Email :</span> {employee.email ?? '—'}</p>
             <p><span className="text-slate-500">Département :</span> {departmentName}</p>
             <p><span className="text-slate-500">Poste :</span> {positionName}</p>
-            <p><span className="text-slate-500">Salaire de base :</span> {employee.salaryBase || 0} Ar</p>
+            <p><span className="text-slate-500">Salaire de base :</span> {Number(employee.salaryBase || 0).toLocaleString('fr-FR')} MGA</p>
             <p><span className="text-slate-500">Statut :</span> {employee.status ?? '—'}</p>
             <p><span className="text-slate-500">Membre :</span> {employee.isMember ? 'Oui' : 'Non'}</p>
             <p><span className="text-slate-500">Member ID :</span> {employee.memberId ?? '—'}</p>

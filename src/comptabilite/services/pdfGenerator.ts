@@ -2,10 +2,10 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { JournalEntry, CompanyConfig, TrialBalanceRow, FixedAsset, Account } from '../types/accounting';
 
-export function formatCurrency(amount: number, symbol: string = 'FCFA'): string {
-  return new Intl.NumberFormat('fr-FR', {
-    maximumFractionDigits: 0,
-  }).format(amount) + ' ' + symbol;
+export function formatCurrency(amount: number, symbol: string = 'MGA'): string {
+  if (isNaN(amount) || amount === null || amount === undefined) return `0 ${symbol}`;
+  const formatted = Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return `${formatted} ${symbol}`;
 }
 
 function addHeader(doc: jsPDF, companyConfig: CompanyConfig, documentTitle: string) {

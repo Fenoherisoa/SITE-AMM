@@ -115,7 +115,7 @@ export default function OverviewDashboard({
             <div>
               <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Solde Trésorerie AMM</p>
               <h3 className="text-2xl font-extrabold text-emerald-600 mt-2.5">
-                {metrics.netBalance.toLocaleString()} Ar
+                {metrics.netBalance.toLocaleString()} MGA
               </h3>
             </div>
             <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">

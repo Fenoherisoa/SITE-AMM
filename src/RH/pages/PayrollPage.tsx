@@ -417,37 +417,37 @@ export const PayrollPage: React.FC = () => {
 
     // Breakdown Table
     const bodyRows: any[] = [
-      ['Salaire de base / Rémunération contractuelle', '', Number(entry.baseSalary || 0).toLocaleString('fr-FR') + ' Ar'],
+      ['Salaire de base / Rémunération contractuelle', '', Number(entry.baseSalary || 0).toLocaleString('fr-FR') + ' MGA'],
     ]
 
     // Primes itemized
     if (entry.primesBreakdown && entry.primesBreakdown.length > 0) {
       entry.primesBreakdown.forEach(p => {
-        bodyRows.push([`  • Prime : ${p.name}`, `+ ${Number(p.amount).toLocaleString('fr-FR')} Ar`, ''])
+        bodyRows.push([`  • Prime : ${p.name}`, `+ ${Number(p.amount).toLocaleString('fr-FR')} MGA`, ''])
       })
     } else if (entry.bonus && entry.bonus > 0) {
-      bodyRows.push(['Primes et gratifications', `+ ${Number(entry.bonus).toLocaleString('fr-FR')} Ar`, ''])
+      bodyRows.push(['Primes et gratifications', `+ ${Number(entry.bonus).toLocaleString('fr-FR')} MGA`, ''])
     }
 
     // Indemnités itemized
     if (entry.indemnitesBreakdown && entry.indemnitesBreakdown.length > 0) {
       entry.indemnitesBreakdown.forEach(i => {
-        bodyRows.push([`  • Indemnité : ${i.name}`, `+ ${Number(i.amount).toLocaleString('fr-FR')} Ar`, ''])
+        bodyRows.push([`  • Indemnité : ${i.name}`, `+ ${Number(i.amount).toLocaleString('fr-FR')} MGA`, ''])
       })
     } else if (entry.indemnites && entry.indemnites > 0) {
-      bodyRows.push(['Indemnités diverses (transport, logement)', `+ ${Number(entry.indemnites).toLocaleString('fr-FR')} Ar`, ''])
+      bodyRows.push(['Indemnités diverses (transport, logement)', `+ ${Number(entry.indemnites).toLocaleString('fr-FR')} MGA`, ''])
     }
 
     // Deductions
     const totalGains = Number(entry.baseSalary || 0) + Number(entry.bonus || 0) + Number(entry.indemnites || 0)
     const ded = Number(entry.deductions || 0)
-    bodyRows.push(['Total Brut Rémunération', '', `${totalGains.toLocaleString('fr-FR')} Ar`])
-    bodyRows.push(['Retenues / Déductions diverses', `-${ded.toLocaleString('fr-FR')} Ar`, ''])
-    bodyRows.push(['NET À PAYER (Ariary)', '', `${Number(entry.netSalary || 0).toLocaleString('fr-FR')} Ar`])
+    bodyRows.push(['Total Brut Rémunération', '', `${totalGains.toLocaleString('fr-FR')} MGA`])
+    bodyRows.push(['Retenues / Déductions diverses', `-${ded.toLocaleString('fr-FR')} MGA`, ''])
+    bodyRows.push(['NET À PAYER (MGA)', '', `${Number(entry.netSalary || 0).toLocaleString('fr-FR')} MGA`])
 
     ;(doc as any).autoTable({
       startY: 94,
-      head: [['Désignation des éléments', 'Gains / Retenues', 'Montant Net (Ar)']],
+      head: [['Désignation des éléments', 'Gains / Retenues', 'Montant Net (MGA)']],
       body: bodyRows,
       theme: 'grid',
       headStyles: { fillColor: [14, 116, 144], textColor: [255, 255, 255], fontStyle: 'bold' },
@@ -583,7 +583,7 @@ export const PayrollPage: React.FC = () => {
             Budget Alloué ({selectedMonth})
           </span>
           <p className="text-xl font-extrabold text-white">
-            {allocatedBudget > 0 ? `${allocatedBudget.toLocaleString('fr-FR')} Ar` : 'Non défini'}
+            {allocatedBudget > 0 ? `${allocatedBudget.toLocaleString('fr-FR')} MGA` : 'Non défini'}
           </p>
           <p className="text-[11px] text-slate-500">Plafond budgétaire autorisé</p>
         </div>
@@ -595,7 +595,7 @@ export const PayrollPage: React.FC = () => {
             Budget Consommé
           </span>
           <p className="text-xl font-extrabold text-indigo-400">
-            {totalConsumedBudget.toLocaleString('fr-FR')} Ar
+            {totalConsumedBudget.toLocaleString('fr-FR')} MGA
           </p>
           <p className="text-[11px] text-slate-500">{monthEntries.length} bulletins enregistrés</p>
         </div>
@@ -607,7 +607,7 @@ export const PayrollPage: React.FC = () => {
             Solde Disponible
           </span>
           <p className={`text-xl font-extrabold ${remainingBudget < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-            {allocatedBudget > 0 ? `${remainingBudget.toLocaleString('fr-FR')} Ar` : '—'}
+            {allocatedBudget > 0 ? `${remainingBudget.toLocaleString('fr-FR')} MGA` : '—'}
           </p>
           <p className="text-[11px] text-slate-500">Marge budgétaire restante</p>
         </div>
@@ -688,7 +688,7 @@ export const PayrollPage: React.FC = () => {
                 <option value="">-- Sélectionner dans la liste ({filteredEmployees.length} trouvés) --</option>
                 {filteredEmployees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
-                    {emp.anarana || `${emp.prenom ?? ''} ${emp.nom ?? ''}`} • Matr: {emp.matricule || '—'} ({emp.salaryBase || 0} Ar)
+                    {emp.anarana || `${emp.prenom ?? ''} ${emp.nom ?? ''}`} • Matr: {emp.matricule || '—'} ({emp.salaryBase || 0} MGA)
                   </option>
                 ))}
               </select>
@@ -712,11 +712,11 @@ export const PayrollPage: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-slate-300 font-semibold">Salaire de Base (Ar) *</label>
+                <label className="block text-slate-300 font-semibold">Salaire de Base (MGA) *</label>
                 <input
                   type="number"
                   required
-                  placeholder="Montant en Ar"
+                  placeholder="Montant en MGA"
                   value={customBaseSalary}
                   onChange={(e) => setCustomBaseSalary(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500 font-mono"
@@ -809,7 +809,7 @@ export const PayrollPage: React.FC = () => {
             {/* Déductions & Mode de règlement */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-slate-300 font-semibold">Déductions / Retenues (Ar)</label>
+                <label className="block text-slate-300 font-semibold">Déductions / Retenues (MGA)</label>
                 <input
                   type="number"
                   value={deductions}
@@ -851,23 +851,23 @@ export const PayrollPage: React.FC = () => {
             <div className="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5 font-mono text-[11px]">
               <div className="flex justify-between text-slate-400">
                 <span>Base :</span>
-                <span>{baseSalaryNumber.toLocaleString('fr-FR')} Ar</span>
+                <span>{baseSalaryNumber.toLocaleString('fr-FR')} MGA</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Primes :</span>
-                <span>+ {totalPrimes.toLocaleString('fr-FR')} Ar</span>
+                <span>+ {totalPrimes.toLocaleString('fr-FR')} MGA</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Indemnités :</span>
-                <span>+ {totalIndemnites.toLocaleString('fr-FR')} Ar</span>
+                <span>+ {totalIndemnites.toLocaleString('fr-FR')} MGA</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Déductions :</span>
-                <span>- {totalDeductions.toLocaleString('fr-FR')} Ar</span>
+                <span>- {totalDeductions.toLocaleString('fr-FR')} MGA</span>
               </div>
               <div className="pt-2 border-t border-slate-800 flex justify-between text-xs font-bold text-cyan-400">
                 <span>NET À PAYER :</span>
-                <span>{calculatedNet.toLocaleString('fr-FR')} Ar</span>
+                <span>{calculatedNet.toLocaleString('fr-FR')} MGA</span>
               </div>
             </div>
 
@@ -968,9 +968,9 @@ export const PayrollPage: React.FC = () => {
                       </div>
 
                       <div className="text-xs font-mono font-bold text-emerald-400 pt-0.5">
-                        Net : {Number(entry.netSalary || 0).toLocaleString('fr-FR')} Ar
+                        Net : {Number(entry.netSalary || 0).toLocaleString('fr-FR')} MGA
                         <span className="text-slate-500 font-normal text-[10px] ml-2">
-                          (Base: {Number(entry.baseSalary || 0).toLocaleString('fr-FR')} Ar)
+                          (Base: {Number(entry.baseSalary || 0).toLocaleString('fr-FR')} MGA)
                         </span>
                       </div>
                     </div>
@@ -1048,7 +1048,7 @@ export const PayrollPage: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-slate-300 font-semibold">Enveloppe Allouée (Ar) *</label>
+                <label className="block text-slate-300 font-semibold">Enveloppe Allouée (MGA) *</label>
                 <input
                   type="number"
                   required

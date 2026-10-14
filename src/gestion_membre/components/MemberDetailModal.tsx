@@ -55,7 +55,7 @@ export default function MemberDetailModal({
     : 'M';
 
   const formatAriary = (amount?: number) => {
-    return (amount || 0).toLocaleString('fr-FR') + ' Ar';
+    return (amount || 0).toLocaleString('fr-FR') + ' MGA';
   };
 
   return (

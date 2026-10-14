@@ -219,7 +219,7 @@ export const UserManagementView: React.FC = () => {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                   {filteredUsers.map((user) => {
                     const roleInfo = ROLE_LABELS[user.role];
-                    const isSelf = user.email === 'admin@siteamm.org';
+                    const isSelf = user.email === 'admin@siteamm.org' || user.email === 'associationmalagasymiray@gmail.com' || user.email === 'raveloarison777@gmail.com';
 
                     return (
                       <tr key={user.uid} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">

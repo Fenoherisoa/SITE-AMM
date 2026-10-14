@@ -14,10 +14,10 @@ export const ORGANIZATION_INFO = {
     { title: 'Durabilité', description: 'La préserver des ressources naturelles et la pérennité des initiatives locales.' }
   ],
   approach: 'Notre approche repose sur l\'accompagnement de proximité, le transfert de compétences pratiques et l\'organisation collective pour pérenniser les opportunités économiques.',
-  contactConfigured: false, // Indicates structured contact info placeholder
-  addressPlaceholder: 'Siège Social - Madagascar',
-  emailPlaceholder: 'contact@association-malagasy-miray.mg',
-  phonePlaceholder: '+261 34 00 000 00'
+  contactConfigured: true,
+  addressPlaceholder: 'Lot 4 11 58, Ambatondrazaka, Madagascar',
+  emailPlaceholder: 'associationmalagasymiray@gmail.com',
+  phonePlaceholder: '+261 34 86 115 36'
 };
 
 export const ACTIVITY_SECTORS: ActivitySector[] = [

@@ -11,12 +11,12 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
   const [info, setInfo] = useState({
-    description: "Loading...",
-    ideologie: "...",
-    lieu: "...",
-    siege_social: "...",
-    email: "...",
-    telephone: "..."
+    description: "Association Malagasy Miray (AMM) — Solidarité, développement communautaire, formation pratique et valorisation citoyenne à Madagascar.",
+    ideologie: "Fanarenana ifotony ny fiarahamonina Malagasy",
+    lieu: "Ambatondrazaka, Madagascar",
+    siege_social: "Lot 4 11 58",
+    email: "associationmalagasymiray@gmail.com",
+    telephone: "+261 34 86 115 36"
   });
 
   const [social, setSocial] = useState({

@@ -1,4 +1,4 @@
-export type CurrencyCode = 'MGA' | 'EUR' | 'USD' | 'XOF';
+export type CurrencyCode = 'MGA' | 'EUR' | 'USD';
 
 export type StockStatus = 'NORMAL' | 'LOW' | 'OUT_OF_STOCK';
 

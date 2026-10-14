@@ -45,23 +45,30 @@ export default function Sidebar({
   ];
 
   return (
-    <div className="fixed inset-y-0 left-0 w-64 bg-slate-900 flex flex-col justify-between z-50 shadow-xl border-r border-slate-800 transition-all font-sans">
-      {/* Header */}
-      <div className="p-5 border-b border-slate-800">
-        <div className="flex items-center justify-between mb-4">
-          <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white cursor-pointer transition-colors">
-            <X className="h-6 w-6" />
-          </button>
-          <span className="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase">
-            {currentUserRole}
-          </span>
+    <>
+      {/* Click-outside backdrop for desktop & mobile pointer navigation */}
+      <div 
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 transition-opacity" 
+        onClick={() => setIsSidebarOpen(false)} 
+        aria-hidden="true"
+      />
+      <div className="fixed inset-y-0 left-0 w-64 bg-slate-900 flex flex-col justify-between z-50 shadow-2xl border-r border-slate-800 transition-all font-sans">
+        {/* Header */}
+        <div className="p-5 border-b border-slate-800">
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white cursor-pointer transition-colors p-1 rounded-lg hover:bg-slate-800">
+              <X className="h-6 w-6" />
+            </button>
+            <span className="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase">
+              {currentUserRole}
+            </span>
+          </div>
+          <h2 className="text-white text-lg font-bold tracking-tight text-center">AMM CONNECT</h2>
+          <p className="text-slate-400 text-xs text-center mt-1 truncate">User: {loginUser}</p>
         </div>
-        <h2 className="text-white text-lg font-bold tracking-tight text-center">AMM CONNECT</h2>
-        <p className="text-slate-400 text-xs text-center mt-1 truncate">User: {loginUser}</p>
-      </div>
 
-      {/* Menu List */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        {/* Menu List */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-4 space-y-1">
         {menuItems.map((item) => {
           if (!item.perm) return null;
           const Icon = item.icon;
@@ -93,17 +100,18 @@ export default function Sidebar({
         })}
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-slate-800">
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg text-rose-400 hover:bg-rose-950/20 hover:text-rose-300 cursor-pointer transition-all"
-        >
-          <LogOut className="h-4 w-4" />
-          Deconnexion
-        </button>
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-800">
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-lg text-rose-400 hover:bg-rose-950/20 hover:text-rose-300 cursor-pointer transition-all"
+          >
+            <LogOut className="h-4 w-4" />
+            Deconnexion
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -198,7 +198,7 @@ export const AccountingPage = () => {
       item.label,
       item.accountDebit,
       item.accountCredit,
-      item.amount.toLocaleString('en-US').replace(/,/g, ' ') + ' Ar'
+      item.amount.toLocaleString('en-US').replace(/,/g, ' ') + ' MGA'
     ])
 
     ;(doc as any).autoTable({
@@ -318,7 +318,7 @@ export const AccountingPage = () => {
             </div>
           ) : (
             <div>
-              <label className="mb-1 block text-xs text-slate-400">Montant (Ar)</label>
+              <label className="mb-1 block text-xs text-slate-400">Montant (MGA)</label>
               <input 
                 type="number"
                 placeholder="0"
@@ -332,7 +332,7 @@ export const AccountingPage = () => {
 
           {caisseType === 'TRANSFERT' && (
             <div>
-              <label className="mb-1 block text-xs text-slate-400">Montant (Ar)</label>
+              <label className="mb-1 block text-xs text-slate-400">Montant (MGA)</label>
               <input 
                 type="number"
                 placeholder="0"
@@ -392,7 +392,7 @@ export const AccountingPage = () => {
                 <th className="px-3 py-3">Libellé</th>
                 <th className="px-3 py-3">Débit (Compte)</th>
                 <th className="px-3 py-3">Crédit (Compte)</th>
-                <th className="px-3 py-3 text-right">Montant (Ar)</th>
+                <th className="px-3 py-3 text-right">Montant (MGA)</th>
                 <th className="px-3 py-3 text-center">Actions (Admin)</th>
               </tr>
             </thead>
@@ -412,7 +412,7 @@ export const AccountingPage = () => {
                     <td className="px-3 py-3 text-xs text-emerald-400 font-mono">{item.accountDebit}</td>
                     <td className="px-3 py-3 text-xs text-rose-400 font-mono">{item.accountCredit}</td>
                     <td className="px-3 py-3 text-right font-semibold text-slate-100 font-mono">
-                      {item.amount.toLocaleString('en-US').replace(/,/g, ' ')} Ar
+                      {item.amount.toLocaleString('en-US').replace(/,/g, ' ')} MGA
                     </td>
                     <td className="px-3 py-3 text-center">
                       <button 

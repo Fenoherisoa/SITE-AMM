@@ -12,11 +12,11 @@ interface CompanySettings {
 }
 
 const defaultSettings: CompanySettings = {
-  companyName: 'AMM RH',
-  companyEmail: 'contact@amm-rh.com',
-  phone: '+261 00 000 00',
-  address: 'Antananarivo, Madagascar',
-  currency: 'Ar',
+  companyName: 'ASSOCIATION MALAGASY MIRAY (AMM RH)',
+  companyEmail: 'associationmalagasymiray@gmail.com',
+  phone: '+261 34 86 115 36',
+  address: 'Lot 4 11 58, Ambatondrazaka, Madagascar',
+  currency: 'MGA',
   defaultWorkHours: '8h',
 }
 

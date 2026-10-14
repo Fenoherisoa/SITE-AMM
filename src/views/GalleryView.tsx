@@ -96,9 +96,15 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
 
       {/* Lightbox Modal */}
       {activeImage && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 text-white rounded-3xl max-w-3xl w-full p-6 space-y-4 shadow-2xl border border-slate-800 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div 
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setActiveImage(null)}
+        >
+          <div 
+            className="bg-slate-900 text-white rounded-3xl max-w-3xl w-full p-6 space-y-4 shadow-2xl border border-slate-800 animate-in fade-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 select-none">
               <div>
                 <span className="text-xs font-bold uppercase text-emerald-400">
                   {activeImage.category} • {activeImage.date}
@@ -109,7 +115,8 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
               </div>
               <button
                 onClick={() => setActiveImage(null)}
-                className="p-2 text-slate-400 hover:text-white"
+                className="p-2 text-slate-400 hover:text-white cursor-pointer"
+                title="Fermer"
               >
                 ✕
               </button>

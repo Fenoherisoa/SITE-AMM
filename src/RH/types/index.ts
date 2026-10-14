@@ -80,12 +80,20 @@ export interface PayrollBudget {
 export interface AttendanceRecord {
   id: string
   employeeId: string
+  matricule?: string
+  employeeName?: string
+  departmentName?: string
+  positionName?: string
   date: string
   checkIn?: string
   checkOut?: string
-  status: 'present' | 'absent' | 'late'
+  status: 'present' | 'absent' | 'late' | 'conge' | 'PRESENT' | 'ABSENT' | 'RETARD' | 'CONGE' | string
+  note?: string
+  recordedBy?: string
+  updatedAt?: string
   createdAt: string
 }
+
 
 export interface LeaveRequest {
   id: string

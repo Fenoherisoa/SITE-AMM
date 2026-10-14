@@ -190,13 +190,25 @@ async function request<T>(
   options?: RequestInit,
 ): Promise<T | null> {
   if (!isUsingFirebase) return null;
+  const cleanPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 4000); // 4s timeout for snappy UI response
-    const res = await fetch(`${EXT_BASE_URL}${endpoint}`, {
-      ...options,
-      signal: controller.signal,
-    });
+    let res: Response;
+    try {
+      res = await fetch(`/api/rtdb${cleanPath}`, {
+        ...options,
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new Error(`Proxy status: ${res.status}`);
+      }
+    } catch {
+      res = await fetch(`${EXT_BASE_URL}${cleanPath}`, {
+        ...options,
+        signal: controller.signal,
+      });
+    }
     clearTimeout(id);
     if (!res.ok) throw new Error("HTTP Error");
     return (await res.json()) as T;

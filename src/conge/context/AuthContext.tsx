@@ -50,12 +50,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
-      await ensureSeedDatabase();
-      const storedUid = localStorage.getItem('rtdb_session_uid');
-      if (storedUid && database) {
-        await loadUserProfileAndBalance(storedUid);
+      try {
+        await ensureSeedDatabase();
+      } catch {
+        // Mode hors ligne / sans Firebase
       }
-      setLoading(false);
+      try {
+        let storedUid = localStorage.getItem('rtdb_session_uid');
+        if (!storedUid) {
+          const centralRaw = localStorage.getItem('amm_authenticated_user');
+          if (centralRaw) {
+            const cUser = JSON.parse(centralRaw);
+            storedUid = cUser.uid || cUser.username || cUser.email;
+            if (storedUid) {
+              localStorage.setItem('rtdb_session_uid', storedUid);
+            }
+          }
+        }
+
+        if (storedUid && database) {
+          await loadUserProfileAndBalance(storedUid);
+        }
+
+        // Si le profil n'a pas pu être chargé depuis la base (ex: hors ligne), initialiser depuis la session centrale
+        const centralRaw = localStorage.getItem('amm_authenticated_user');
+        if (centralRaw) {
+          const cUser = JSON.parse(centralRaw);
+          setProfile((prev) => {
+            if (prev) return prev;
+            return {
+              uid: storedUid || cUser.uid || 'session_user',
+              email: cUser.email || `${cUser.displayName || 'user'}@amm.mg`,
+              displayName: cUser.displayName || cUser.email || 'Utilisateur AMM',
+              role: cUser.role || 'USER',
+              cin: cUser.cin || '',
+              phone: cUser.phone || '',
+              departmentName: cUser.department || 'Service AMM',
+              jobTitle: 'Membre / Collaborateur',
+              permissions: cUser.permissions || {},
+            };
+          });
+        }
+      } catch (err) {
+        console.warn('[Conge] initAuth warning:', err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     initAuth();

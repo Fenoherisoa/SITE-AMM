@@ -244,7 +244,7 @@ export default function CaisseOperationsTab({
 
     // Balance check for cash out
     if ((formType === 'DECAISSEMENT' || formType === 'TRANSFERT') && stats.currentSolde < amount) {
-      if (!window.confirm(`Attention : Le solde en caisse (${stats.currentSolde.toLocaleString('fr-FR')} Ar) est inférieur au montant demandé (${amount.toLocaleString('fr-FR')} Ar). Confirmer tout de même le décaissement ?`)) {
+      if (!window.confirm(`Attention : Le solde en caisse (${stats.currentSolde.toLocaleString('fr-FR')} MGA) est inférieur au montant demandé (${amount.toLocaleString('fr-FR')} MGA). Confirmer tout de même le décaissement ?`)) {
         return;
       }
     }
@@ -301,7 +301,7 @@ export default function CaisseOperationsTab({
         console.warn('Sync to transactions warning:', syncErr);
       }
 
-      setNotification({ type: 'success', text: `Opération de ${formType.toLowerCase()} de ${amount.toLocaleString('fr-FR')} Ar validée avec succès !` });
+      setNotification({ type: 'success', text: `Opération de ${formType.toLowerCase()} de ${amount.toLocaleString('fr-FR')} MGA validée avec succès !` });
       setShowModal(false);
       setFormMontant('');
       setFormMotif('');
@@ -369,7 +369,7 @@ export default function CaisseOperationsTab({
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(15, 23, 42);
-    doc.text(`Montant : ${op.montant.toLocaleString('fr-FR')} Ariary (MGA)`, 20, 64);
+    doc.text(`Montant : ${op.montant.toLocaleString('fr-FR')} MGA`, 20, 64);
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
@@ -422,14 +422,14 @@ export default function CaisseOperationsTab({
       op.pieceNumero || '—',
       op.motif,
       op.tiers || '—',
-      op.type === 'ENCAISSEMENT' || (op.netImpact > 0) ? `${op.montant.toLocaleString('fr-FR')} Ar` : '',
-      op.type === 'DECAISSEMENT' || (op.netImpact < 0) ? `${op.montant.toLocaleString('fr-FR')} Ar` : '',
-      `${op.runningBalance.toLocaleString('fr-FR')} Ar`
+      op.type === 'ENCAISSEMENT' || (op.netImpact > 0) ? `${op.montant.toLocaleString('fr-FR')} MGA` : '',
+      op.type === 'DECAISSEMENT' || (op.netImpact < 0) ? `${op.montant.toLocaleString('fr-FR')} MGA` : '',
+      `${op.runningBalance.toLocaleString('fr-FR')} MGA`
     ]);
 
     ;(doc as any).autoTable({
       startY: 32,
-      head: [['Date', 'N° Pièce', 'Motif / Libellé', 'Tiers', 'Entrée (Ar)', 'Sortie (Ar)', 'Solde (Ar)']],
+      head: [['Date', 'N° Pièce', 'Motif / Libellé', 'Tiers', 'Entrée (MGA)', 'Sortie (MGA)', 'Solde (MGA)']],
       body: rows,
       theme: 'grid',
       headStyles: { fillColor: [15, 23, 42], fontSize: 8 },
@@ -454,7 +454,7 @@ export default function CaisseOperationsTab({
               <Wallet className="w-3.5 h-3.5" />
               Module Opérations & Trésorerie
             </span>
-            <span className="text-xs text-slate-500">• Devise : MGA (Ariary)</span>
+            <span className="text-xs text-slate-500">• Devise : MGA</span>
           </div>
           <h2 className="mt-1 text-2xl font-bold text-slate-100 tracking-tight">
             Gestion de Caisse & Mouvements d'Espèces
@@ -522,7 +522,7 @@ export default function CaisseOperationsTab({
             <span className={`h-2.5 w-2.5 rounded-full ${stats.currentSolde >= 0 ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500 animate-ping'}`} />
           </div>
           <p className={`text-2xl font-extrabold ${stats.currentSolde >= 0 ? 'text-white' : 'text-rose-400'}`}>
-            {stats.currentSolde.toLocaleString('fr-FR')} Ar
+            {stats.currentSolde.toLocaleString('fr-FR')} MGA
           </p>
           <p className="text-[10px] text-slate-500">
             {selectedAccount === 'ALL' ? 'Toutes caisses consolidées' : CAISSE_ACCOUNTS.find(a => a.code === selectedAccount)?.label}
@@ -536,7 +536,7 @@ export default function CaisseOperationsTab({
             Total Entrées (Encaissements)
           </span>
           <p className="text-2xl font-extrabold text-emerald-400">
-            +{stats.totalIn.toLocaleString('fr-FR')} Ar
+            +{stats.totalIn.toLocaleString('fr-FR')} MGA
           </p>
           <p className="text-[10px] text-slate-500">Flux d'espèces entrants</p>
         </div>
@@ -548,7 +548,7 @@ export default function CaisseOperationsTab({
             Total Sorties (Décaissements)
           </span>
           <p className="text-2xl font-extrabold text-rose-400">
-            -{stats.totalOut.toLocaleString('fr-FR')} Ar
+            -{stats.totalOut.toLocaleString('fr-FR')} MGA
           </p>
           <p className="text-[10px] text-slate-500">Flux d'espèces sortants</p>
         </div>
@@ -631,9 +631,9 @@ export default function CaisseOperationsTab({
                 <th className="py-2.5 px-3">Type</th>
                 <th className="py-2.5 px-3">Motif & Justification</th>
                 <th className="py-2.5 px-3">Tiers</th>
-                <th className="py-2.5 px-3 text-right text-emerald-400">Entrée (Ar)</th>
-                <th className="py-2.5 px-3 text-right text-rose-400">Sortie (Ar)</th>
-                <th className="py-2.5 px-3 text-right text-cyan-400">Solde (Ar)</th>
+                <th className="py-2.5 px-3 text-right text-emerald-400">Entrée (MGA)</th>
+                <th className="py-2.5 px-3 text-right text-rose-400">Sortie (MGA)</th>
+                <th className="py-2.5 px-3 text-right text-cyan-400">Solde (MGA)</th>
                 <th className="py-2.5 px-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -823,7 +823,7 @@ export default function CaisseOperationsTab({
               {/* Montant & Pièce */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-slate-300 font-semibold">Montant (Ariary - Ar) *</label>
+                  <label className="block text-slate-300 font-semibold">Montant (MGA) *</label>
                   <input
                     type="number"
                     required

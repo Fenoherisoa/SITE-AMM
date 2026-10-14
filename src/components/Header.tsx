@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { PageRoute, UserMetadata } from '../types';
-import { Lock, Menu, X, Shield, User, LogOut } from 'lucide-react';
+import { Lock, Menu, X, Shield, User, LogOut, Radio } from 'lucide-react';
+import { NetworkStatusBar } from '../offline/components/NetworkStatusBar';
+import { SyncCenterModal } from '../offline/components/SyncCenterModal';
 
 interface HeaderProps {
   currentRoute: PageRoute;
@@ -16,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSignOut
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
 
   const navLinks: { route: PageRoute; label: string }[] = [
     { route: 'home', label: 'Accueil' },
@@ -41,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo & Brand Identity */}
           <button 
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-3 text-left focus:outline-hidden group"
+            className="flex items-center gap-3 text-left focus:outline-hidden group cursor-pointer"
           >
             <div className="w-10 h-10 rounded-lg bg-[#007E3A] text-white flex items-center justify-center font-bold text-xl shadow-xs group-hover:scale-105 transition-transform duration-200">
               <span className="font-sans font-extrabold">M</span>
@@ -64,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   key={link.route}
                   onClick={() => handleNavClick(link.route)}
-                  className={`text-sm font-medium transition-colors duration-150 py-1 ${
+                  className={`text-sm font-medium transition-colors duration-150 py-1 cursor-pointer ${
                     isActive
                       ? 'text-[#007E3A] border-b-2 border-[#007E3A] font-semibold'
                       : 'text-gray-500 hover:text-gray-900'
@@ -76,13 +79,17 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </nav>
 
-          {/* Right Action: Secure Area / User State */}
+          {/* Right Action: Sync Status & Secure Area */}
           <div className="hidden lg:flex items-center gap-3">
+            
+            {/* Widget Réseau & Synchronisation Hors Ligne */}
+            <NetworkStatusBar onOpenSyncCenter={() => setSyncModalOpen(true)} />
+
             {currentUser ? (
               <div className="flex items-center gap-2 bg-gray-50 border border-gray-200/80 rounded-full p-1.5 pl-4">
                 <button
                   onClick={() => handleNavClick('espace')}
-                  className="flex items-center gap-2 text-xs font-semibold text-[#1A202C] hover:text-[#007E3A]"
+                  className="flex items-center gap-2 text-xs font-semibold text-[#1A202C] hover:text-[#007E3A] cursor-pointer"
                 >
                   <User className="w-4 h-4 text-[#007E3A]" />
                   <span className="truncate max-w-[120px]">{currentUser.displayName}</span>
@@ -93,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={onSignOut}
                   title="Se Déconnecter"
-                  className="p-1.5 text-gray-400 hover:text-[#AD1D28] hover:bg-rose-50 rounded-full transition-colors"
+                  className="p-1.5 text-gray-400 hover:text-[#AD1D28] hover:bg-rose-50 rounded-full transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -101,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={() => handleNavClick('login')}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-[#1A202C] hover:bg-black transition-colors duration-200 shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-[#1A202C] hover:bg-black transition-colors duration-200 shadow-sm cursor-pointer"
               >
                 <Lock className="w-4 h-4 text-emerald-400" />
                 <span>Accès Sécurisé</span>
@@ -109,12 +116,14 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Mobile Menu Toggle Button */}
+          {/* Mobile Actions Toggle Button */}
           <div className="flex xl:hidden items-center gap-2">
+            <NetworkStatusBar onOpenSyncCenter={() => setSyncModalOpen(true)} />
+
             {!currentUser && (
               <button
                 onClick={() => handleNavClick('login')}
-                className="p-2 text-slate-700 hover:text-emerald-700 rounded-lg"
+                className="p-2 text-slate-700 hover:text-emerald-700 rounded-lg cursor-pointer"
                 title="Connexion Sécurisée"
               >
                 <Shield className="w-5 h-5 text-emerald-700" />
@@ -122,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 text-slate-700 hover:text-slate-900 rounded-xl hover:bg-slate-100 focus:outline-hidden"
+              className="p-2.5 text-slate-700 hover:text-slate-900 rounded-xl hover:bg-slate-100 focus:outline-hidden cursor-pointer"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -134,12 +143,18 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-1.5 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <>
+          <div 
+            className="fixed inset-0 top-20 bg-slate-900/40 backdrop-blur-xs z-40 xl:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="xl:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-1.5 shadow-xl animate-in slide-in-from-top-2 duration-200 relative z-50 max-h-[calc(100vh-5rem)] overflow-y-auto custom-scrollbar">
           {navLinks.map((link) => (
             <button
               key={link.route}
               onClick={() => handleNavClick(link.route)}
-              className={`w-full text-left px-4 py-3 rounded-xl text-base font-semibold transition-colors ${
+              className={`w-full text-left px-4 py-3 rounded-xl text-base font-semibold transition-colors cursor-pointer ${
                 currentRoute === link.route
                   ? 'bg-emerald-50 text-emerald-800'
                   : 'text-slate-700 hover:bg-slate-50'
@@ -149,12 +164,26 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           ))}
           
-          <div className="pt-4 border-t border-slate-100">
+          <div className="pt-4 border-t border-slate-100 space-y-2">
+            <button
+              onClick={() => {
+                setSyncModalOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-amber-50 text-amber-900 font-semibold text-xs border border-amber-200 cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Radio className="w-4 h-4 text-amber-700" />
+                Centre de Synchronisation & Wi-Fi LAN
+              </span>
+              <span className="text-[10px] bg-amber-200 px-2 py-0.5 rounded-full font-bold">Ouvrir</span>
+            </button>
+
             {currentUser ? (
               <div className="space-y-2">
                 <button
                   onClick={() => handleNavClick('espace')}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50 font-semibold text-slate-800"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50 font-semibold text-slate-800 cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <User className="w-5 h-5 text-emerald-600" />
@@ -169,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({
                     onSignOut();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-rose-700 font-semibold hover:bg-rose-50"
+                  className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-rose-700 font-semibold hover:bg-rose-50 cursor-pointer"
                 >
                   <LogOut className="w-5 h-5" />
                   Se Déconnecter
@@ -178,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={() => handleNavClick('login')}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold shadow-md"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold shadow-md cursor-pointer"
               >
                 <Lock className="w-5 h-5 text-emerald-400" />
                 Accès Membres / Espace Sécurisé
@@ -186,7 +215,14 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
         </div>
-      )}
+      </>
+    )}
+
+      {/* Modal Centre de Synchronisation & Réseau Local */}
+      <SyncCenterModal
+        isOpen={syncModalOpen}
+        onClose={() => setSyncModalOpen(false)}
+      />
     </header>
   );
 };

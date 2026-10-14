@@ -47,18 +47,17 @@
   }
 }
 
-/* Base mobile overrides to feel like native applets on iOS / Android */
+/* Base overrides for desktop & mobile pointer devices */
 @layer base {
   html, body {
     -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    overscroll-behavior-y: contain;
+    user-select: text;
+    -webkit-user-select: text;
     overflow-x: hidden;
+    overflow-y: auto;
   }
   
-  /* Re-enable selection specifically for inputs/textareas to allow keyboard inputting and clipboard copy */
+  /* Selection specifically enabled for inputs/textareas and readable elements */
   input, textarea, [contenteditable="true"] {
     -webkit-user-select: text;
     user-select: text;

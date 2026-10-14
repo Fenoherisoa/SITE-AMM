@@ -123,7 +123,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {t.soldeDispo}
             </span>
             <span className="text-3xl font-black font-display text-brand-text tracking-tight block">
-              {compte.solde.toLocaleString('fr-FR')} <span className="text-base text-brand-accent font-bold font-mono">AR</span>
+              {compte.solde.toLocaleString('fr-FR')} <span className="text-base text-brand-accent font-bold font-mono">MGA</span>
             </span>
           </div>
 
@@ -141,7 +141,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {t.income} (Total)
               </span>
               <span className="text-2xl font-extrabold text-brand-green tracking-tight block">
-                + {compte.solde_credit.toLocaleString('fr-FR')} <span className="text-xs font-mono font-normal text-brand-muted">AR</span>
+                + {compte.solde_credit.toLocaleString('fr-FR')} <span className="text-xs font-mono font-normal text-brand-muted">MGA</span>
               </span>
             </div>
             <div className="p-2 bg-brand-green/10 text-brand-green rounded-xl">
@@ -163,7 +163,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {t.outcome} (Total)
               </span>
               <span className="text-2xl font-extrabold text-brand-red tracking-tight block">
-                - {compte.solde_debit.toLocaleString('fr-FR')} <span className="text-xs font-mono font-normal text-brand-muted">AR</span>
+                - {compte.solde_debit.toLocaleString('fr-FR')} <span className="text-xs font-mono font-normal text-brand-muted">MGA</span>
               </span>
             </div>
             <div className="p-2 bg-brand-red/10 text-brand-red rounded-xl">
