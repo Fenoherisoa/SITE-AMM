@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import StatCards from '../dashboard/StatCards';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginModal } from './components/auth/LoginModal';
 import { Moduleconge } from './components/leave/Moduleconge';
