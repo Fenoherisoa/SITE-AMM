@@ -29,7 +29,8 @@ const CLOUD_SYNC_COLLECTIONS: Record<string, string> = {
   departments: 'departments',
   positions: 'positions',
   leave_requests: 'leave_requests',
-  payroll: 'payroll'
+  payroll: 'payroll',
+  attendances: 'attendances'
 };
 
 class SyncEngine {

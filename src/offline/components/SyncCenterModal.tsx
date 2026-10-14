@@ -5,6 +5,7 @@ import { networkManager } from '../network/networkManager';
 import { syncLogger } from '../sync/syncLogger';
 import { DataLayer } from '../dataLayer';
 import { BackupService } from '../storage/backupService';
+import { storageManager } from '../storage/StorageManager';
 import { 
   SyncState, 
   NetworkState, 
@@ -693,6 +694,34 @@ export const SyncCenterModal: React.FC<SyncCenterModalProps> = ({ isOpen, onClos
                   <div className="font-semibold">{restoreFeedback.message}</div>
                 </div>
               )}
+
+              {/* Moteur de Stockage Actif */}
+              <div className="p-5 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-indigo-950 flex items-center gap-2">
+                    <Database className="w-4 h-4 text-indigo-600" />
+                    Moteur de Persistance Locale
+                  </h3>
+                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                    storageManager.isElectronEnvironment()
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-slate-200 text-slate-800'
+                  }`}>
+                    {storageManager.isElectronEnvironment() ? 'SQLite Natif (Windows App)' : 'IndexedDB (Navigateur / Web)'}
+                  </span>
+                </div>
+                <p className="text-xs text-indigo-900 leading-relaxed">
+                  {storageManager.isElectronEnvironment() ? (
+                    <>
+                      L'application Windows exécute une base de données <strong>SQLite persistante avec journalisation WAL</strong> (Write-Ahead Logging). Vos modifications, transactions et la file de synchronisation (Outbox) restent garanties sur disque après fermeture et redémarrage de l'ordinateur.
+                    </>
+                  ) : (
+                    <>
+                      L'application s'exécute dans un navigateur standard et utilise la base de données transactionnelle <strong>IndexedDB</strong> locale pour stocker vos données et préparer la synchronisation.
+                    </>
+                  )}
+                </p>
+              </div>
 
               {/* Export Sauvegarde */}
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">

@@ -10,8 +10,10 @@ import {
   AlertTriangle, 
   Clock, 
   Server, 
-  Radio
+  Radio,
+  Database
 } from 'lucide-react';
+import { storageManager } from '../storage/StorageManager';
 
 interface NetworkStatusBarProps {
   onOpenSyncCenter: () => void;
@@ -114,6 +116,12 @@ export const NetworkStatusBar: React.FC<NetworkStatusBarProps> = ({ onOpenSyncCe
       title="Ouvrir le Centre de Synchronisation & Réseau Local"
       className="inline-flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 transition-colors cursor-pointer group"
     >
+      {storageManager.isElectronEnvironment() && (
+        <span className="hidden xl:inline-flex items-center gap-1 text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+          <Database className="w-3 h-3 text-indigo-600 shrink-0" />
+          <span>App Windows (SQLite)</span>
+        </span>
+      )}
       {getNetworkBadge()}
       {getSyncBadge()}
     </button>

@@ -26,6 +26,7 @@ export const ALL_STORES = [
   'leave_requests',
   'conge_balances',
   'payroll',
+  'attendances',
   'inventory',
   'movements',
   'suppliers',
