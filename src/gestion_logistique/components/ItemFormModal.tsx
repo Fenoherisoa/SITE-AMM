@@ -60,8 +60,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
     }
   }, [initialItem, isOpen]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!code || !name) return;

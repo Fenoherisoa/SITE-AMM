@@ -84,8 +84,6 @@ export const SyncCenterModal: React.FC<SyncCenterModalProps> = ({ isOpen, onClos
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   // Formatage des dates
   const formatDate = (ts: number | null) => {
     if (!ts) return 'Aucune synchronisation enregistrée';

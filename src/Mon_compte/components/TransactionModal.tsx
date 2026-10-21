@@ -44,7 +44,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Calculators
   const parsedAmount = Math.max(0, parseInt(amount) || 0);
@@ -185,19 +192,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
   const OPERATEURS = [
     { name: 'Mvola' as MobileOperator, color: 'Green', dotColor: 'bg-brand-green', pillClass: 'border-brand-green/20 text-brand-green hover:bg-brand-green/10' },
     { name: 'Orange Money' as MobileOperator, color: 'Orange', dotColor: 'bg-orange-500', pillClass: 'border-orange-500/20 text-orange-200 hover:bg-orange-950/30' },
     { name: 'Airtel Money' as MobileOperator, color: 'Red', dotColor: 'bg-red-500', pillClass: 'border-red-500/20 text-red-200 hover:bg-red-950/30' }
   ];
+
+  if (!isOpen) return null;
 
   return (
     <div 

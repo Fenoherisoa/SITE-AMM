@@ -63,8 +63,9 @@ export default function Sidebar({
               {currentUserRole}
             </span>
           </div>
-          <h2 className="text-white text-lg font-bold tracking-tight text-center">AMM CONNECT</h2>
-          <p className="text-slate-400 text-xs text-center mt-1 truncate">User: {loginUser}</p>
+          <h2 className="text-white text-base font-bold tracking-tight text-center uppercase">Gestion des Membres</h2>
+          <p className="text-indigo-400 text-[10px] uppercase font-bold text-center mt-0.5 tracking-wider">Sous-menu du Module</p>
+          <p className="text-slate-400 text-xs text-center mt-1 truncate">Opérateur : {loginUser}</p>
         </div>
 
         {/* Menu List */}

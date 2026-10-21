@@ -190,20 +190,23 @@ export const FirebaseService = {
   },
 
   async saveMember(member: Member): Promise<void> {
+    // Nettoyage rigoureux des propriétés undefined
+    const cleanMember: Member = JSON.parse(JSON.stringify(member));
+
     // 1. Sauvegarde locale immédiate dans IndexedDB + mise en file d'attente
-    await DataLayer.saveRecord('olona', member.id, member);
-    syncLogger.log('info', `Membre ${member.matricule} enregistré localement`, 'LOCAL');
+    await DataLayer.saveRecord('olona', cleanMember.id, cleanMember);
+    syncLogger.log('info', `Membre ${cleanMember.matricule} enregistré localement`, 'LOCAL');
 
     // 2. Si en ligne, envoi direct vers Firebase
     if (typeof navigator !== 'undefined' && navigator.onLine) {
       try {
-        const res = await requestRtdb(`/olona/${member.id}.json`, {
+        const res = await requestRtdb(`/olona/${cleanMember.id}.json`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(member)
+          body: JSON.stringify(cleanMember)
         });
         if (res.ok) {
-          syncLogger.log('success', `Membre ${member.matricule} synchronisé avec Firebase`, 'CLOUD');
+          syncLogger.log('success', `Membre ${cleanMember.matricule} synchronisé avec Firebase`, 'CLOUD');
         }
       } catch (e) {
         console.warn('Envoi direct Firebase échoué, conservé en file d’attente:', e);
@@ -546,8 +549,9 @@ export const FirebaseService = {
   },
 
   async getUser(username: string): Promise<UserAccount | null> {
+    const safeKey = encodeURIComponent(username.replace(/[.#$\[\]]/g, '_'));
     try {
-      const res = await requestRtdb(`/users/${username}.json`);
+      const res = await requestRtdb(`/users/${safeKey}.json`);
       if (res.ok) return await res.json();
     } catch {}
     return await DataLayer.getById<UserAccount>('users', username);
@@ -557,7 +561,8 @@ export const FirebaseService = {
     await DataLayer.saveRecord('users', username, user);
     if (typeof navigator !== 'undefined' && navigator.onLine) {
       try {
-        await requestRtdb(`/users/${username}.json`, {
+        const safeKey = encodeURIComponent(username.replace(/[.#$\[\]]/g, '_'));
+        await requestRtdb(`/users/${safeKey}.json`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(user)
@@ -570,7 +575,8 @@ export const FirebaseService = {
     await DataLayer.deleteRecord('users', username);
     if (typeof navigator !== 'undefined' && navigator.onLine) {
       try {
-        await requestRtdb(`/users/${username}.json`, { method: "DELETE" });
+        const safeKey = encodeURIComponent(username.replace(/[.#$\[\]]/g, '_'));
+        await requestRtdb(`/users/${safeKey}.json`, { method: "DELETE" });
       } catch {}
     }
   },

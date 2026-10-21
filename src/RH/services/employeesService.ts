@@ -33,37 +33,89 @@ const createMatricule = async (rhId: string) => {
   return `AMM-RH-${suffix}`
 }
 
+export const stripUndefined = <T extends Record<string, any>>(obj: T): Partial<T> => {
+  if (!obj || typeof obj !== 'object') return obj
+  const clean: Record<string, any> = {}
+  for (const [key, val] of Object.entries(obj)) {
+    if (val !== undefined) {
+      if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+        clean[key] = stripUndefined(val)
+      } else {
+        clean[key] = val
+      }
+    }
+  }
+  return clean as Partial<T>
+}
+
 export const getEmployees = async (): Promise<Employee[]> => {
   const snapshot = await get(employeesRef())
   return parseList<Employee>(snapshot)
 }
 
 export const getEmployeeById = async (id: string): Promise<Employee | null> => {
+  if (!id) return null
   const snapshot = await get(ref(db, `employees/${id}`))
   if (!snapshot.exists()) return null
-  return { ...(snapshot.val() as Employee), id } as Employee
+  const data = snapshot.val() as Record<string, any>
+  return { 
+    ...data, 
+    id,
+    status: String(data.status || 'Active').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
+  } as Employee
 }
 
 export const addEmployee = async (employee: Omit<Employee, 'id'> & { id?: string }) => {
+  if (!employee.anarana && !employee.nom) {
+    throw new Error("Le nom de l'employé est obligatoire.")
+  }
   const id = employee.id ?? employee.employeeId ?? (await createRhId())
   const matricule = employee.matricule ?? (await createMatricule(id))
-  const payload = {
+
+  const normalizedStatus: 'Active' | 'Inactive' =
+    String(employee.status || '').trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
+
+  const payload = stripUndefined({
     ...employee,
     id,
     employeeId: id,
     matricule,
+    status: normalizedStatus,
     submitted_at: employee.submitted_at ?? new Date().toISOString(),
-  }
+  })
+
   await set(ref(db, `employees/${id}`), payload)
   await ensureEmployeeAccount(matricule)
   return id
 }
 
 export const updateEmployee = async (id: string, employee: Partial<Employee>) => {
-  await update(ref(db, `employees/${id}`), employee)
+  if (!id) {
+    throw new Error("L'identifiant de l'employé est manquant.")
+  }
+
+  // Retrieve existing employee to preserve untouched fields and guaranteed valid status
+  const snapshot = await get(ref(db, `employees/${id}`))
+  const existing = snapshot.exists() ? (snapshot.val() as Employee) : null
+
+  let normalizedStatus: 'Active' | 'Inactive' = 'Active'
+  if (employee.status !== undefined && employee.status !== null) {
+    normalizedStatus = String(employee.status).trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
+  } else if (existing?.status) {
+    normalizedStatus = String(existing.status).trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
+  }
+
+  const cleanPayload = stripUndefined({
+    ...employee,
+    status: normalizedStatus,
+    updated_at: new Date().toISOString(),
+  })
+
+  await update(ref(db, `employees/${id}`), cleanPayload)
 }
 
 export const deleteEmployee = async (id: string) => {
+  if (!id) return
   await remove(ref(db, `employees/${id}`))
 }
 
@@ -81,15 +133,19 @@ export const getDepartments = async (): Promise<Department[]> => {
 
 export const addDepartment = async (department: Omit<Department, 'id'>) => {
   const newRef = push(departmentsRef())
-  await set(newRef, department)
+  const clean = stripUndefined(department as Record<string, any>)
+  await set(newRef, clean)
   return newRef.key
 }
 
 export const updateDepartment = async (id: string, department: Partial<Department>) => {
-  await update(ref(db, `departments/${id}`), department)
+  if (!id) return
+  const clean = stripUndefined(department as Record<string, any>)
+  await update(ref(db, `departments/${id}`), clean)
 }
 
 export const deleteDepartment = async (id: string) => {
+  if (!id) return
   await remove(ref(db, `departments/${id}`))
 }
 
@@ -100,14 +156,18 @@ export const getPositions = async (): Promise<Position[]> => {
 
 export const addPosition = async (position: Omit<Position, 'id'>) => {
   const newRef = push(positionsRef())
-  await set(newRef, position)
+  const clean = stripUndefined(position as Record<string, any>)
+  await set(newRef, clean)
   return newRef.key
 }
 
 export const updatePosition = async (id: string, position: Partial<Position>) => {
-  await update(ref(db, `positions/${id}`), position)
+  if (!id) return
+  const clean = stripUndefined(position as Record<string, any>)
+  await update(ref(db, `positions/${id}`), clean)
 }
 
 export const deletePosition = async (id: string) => {
+  if (!id) return
   await remove(ref(db, `positions/${id}`))
 }

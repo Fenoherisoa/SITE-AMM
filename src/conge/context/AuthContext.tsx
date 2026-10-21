@@ -22,8 +22,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [balance, setBalance] = useState<LeaveBalance | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const isValidFirebaseKey = (k: string) => typeof k === 'string' && k.trim().length > 0 && !/[.#$\[\]/]/.test(k);
+
   const loadUserProfileAndBalance = async (uid: string) => {
-    if (!database) return;
+    if (!database || !isValidFirebaseKey(uid)) return;
     try {
       const snap = await get(ref(database, `users/${uid}`));
       if (snap.exists()) {
@@ -61,7 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const centralRaw = localStorage.getItem('amm_authenticated_user');
           if (centralRaw) {
             const cUser = JSON.parse(centralRaw);
-            storedUid = cUser.uid || cUser.username || cUser.email;
+            storedUid = (cUser.uid && isValidFirebaseKey(cUser.uid))
+              ? cUser.uid
+              : (cUser.username && isValidFirebaseKey(cUser.username) ? cUser.username : null);
             if (storedUid) {
               localStorage.setItem('rtdb_session_uid', storedUid);
             }

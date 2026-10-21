@@ -80,7 +80,14 @@ export const SubmitLeaveModal: React.FC<SubmitLeaveModalProps> = ({
     }
   }, [startDate, endDate, profile?.departmentId, profile?.uid]);
 
-  if (!isOpen || !profile) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,13 +139,7 @@ export const SubmitLeaveModal: React.FC<SubmitLeaveModalProps> = ({
     }
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  if (!isOpen || !profile) return null;
 
   return (
     <div 

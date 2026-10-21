@@ -177,11 +177,11 @@ export const EmployeesPage = () => {
     const cinPattern = /^\d{12}$/
     const phonePattern = /^[0-9+()\s-]{7,15}$/
 
-    if (!isEdit) {
-      if (!form.anarana.trim()) return 'Le nom est obligatoire.'
-      if (!cinPattern.test(form.cin.trim())) return 'Le CIN doit contenir 12 chiffres.'
-      if (!phonePattern.test(form.telephone.trim())) return 'Le téléphone est invalide.'
-    }
+    if (!form.anarana.trim()) return 'Le nom (Anarana) est obligatoire.'
+    if (form.cin.trim() && !cinPattern.test(form.cin.trim())) return 'Le CIN doit contenir 12 chiffres.'
+    if (form.telephone.trim() && !phonePattern.test(form.telephone.trim())) return 'Le téléphone est invalide.'
+    if (!form.departmentId) return 'Veuillez sélectionner un département.'
+    if (!form.positionId) return 'Veuillez sélectionner un poste.'
 
     return null
   }
@@ -198,31 +198,45 @@ export const EmployeesPage = () => {
     }
 
     try {
+      const normalizedStatus: 'Active' | 'Inactive' =
+        String(form.status || '').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
+
       if (isEdit && selectedEmployee) {
-        const patch = {
+        const patch: Partial<Employee> = {
+          anarana: form.anarana.trim(),
+          cin: form.cin.trim(),
+          telephone: form.telephone.trim(),
+          email: form.email.trim(),
           departmentId: form.departmentId,
           positionId: form.positionId,
-          salaryBase: Number(form.salaryBase),
-          status: form.status,
-          isMember: form.isMember,
+          salaryBase: Number(form.salaryBase) || 0,
+          status: normalizedStatus,
+          isMember: Boolean(form.isMember),
           memberId: form.isMember ? form.memberId || null : null,
+          province: form.province || null,
+          region: form.region || null,
+          district: form.district || null,
+          commune: form.commune || null,
+          fokontany: form.fokontany || null,
+          date_naissance: form.dateNaissance || null,
+          email_notification: form.emailNotification || null,
+          genre: form.genre || 'LAHY',
         }
         await updateEmployee(selectedEmployee.id, patch)
-        setFeedback('Employé mis à jour.')
+        setFeedback('Employé mis à jour avec succès.')
         setEmployees((current) => current.map((employee) => employee.id === selectedEmployee.id ? { ...employee, ...patch } : employee))
         setSelectedEmployee({ ...selectedEmployee, ...patch })
-        setForm((current) => ({ ...current, departmentId: patch.departmentId, positionId: patch.positionId, salaryBase: patch.salaryBase, status: patch.status as 'Active' | 'Inactive', isMember: patch.isMember, memberId: patch.memberId ?? '' }))
       } else {
         const payload = {
-          anarana: form.anarana,
-          cin: form.cin,
-          telephone: form.telephone,
-          email: form.email,
+          anarana: form.anarana.trim(),
+          cin: form.cin.trim(),
+          telephone: form.telephone.trim(),
+          email: form.email.trim(),
           departmentId: form.departmentId,
           positionId: form.positionId,
-          salaryBase: Number(form.salaryBase),
-          status: form.status,
-          isMember: form.isMember,
+          salaryBase: Number(form.salaryBase) || 0,
+          status: normalizedStatus,
+          isMember: Boolean(form.isMember),
           memberId: form.isMember ? form.memberId || null : null,
           province: form.province,
           region: form.region,
@@ -231,7 +245,7 @@ export const EmployeesPage = () => {
           fokontany: form.fokontany,
           date_naissance: form.dateNaissance,
           email_notification: form.emailNotification,
-          genre: form.genre,
+          genre: form.genre || 'LAHY',
         }
         await addEmployee(payload as Employee)
         setFeedback('Employé créé avec succès.')
@@ -243,8 +257,10 @@ export const EmployeesPage = () => {
   }
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet employé ?")) return
     await deleteEmployee(id)
     setEmployees((current) => current.filter((employee) => employee.id !== id))
+    if (selectedEmployee?.id === id) resetForm()
   }
 
   const displayValue = (value?: string | null, fallback = '—') => {
@@ -265,8 +281,8 @@ export const EmployeesPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-cyan-400">Employés</p>
-          <h2 className="mt-2 text-3xl font-semibold">Gestion des employés</h2>
+          <p className="text-sm uppercase tracking-[0.3em] text-cyan-400">Ressources Humaines</p>
+          <h2 className="mt-2 text-3xl font-semibold">Gestion du Personnel & Employés</h2>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <input className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm" placeholder="Rechercher" value={search} onChange={(event) => setSearch(event.target.value)} />
@@ -277,7 +293,7 @@ export const EmployeesPage = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
@@ -292,28 +308,39 @@ export const EmployeesPage = () => {
               </thead>
               <tbody>
                 {filteredEmployees.map((employee) => (
-                  <tr key={employee.id} className="border-b border-slate-800/70">
-                    <td className="px-3 py-3">{displayValue(employee.anarana ?? `${employee.prenom ?? ''} ${employee.nom ?? ''}`.trim())}</td>
-                    <td className="px-3 py-3">{displayValue(positions.find((position) => position.id === employee.positionId)?.name)}</td>
-                    <td className="px-3 py-3">{displayValue(departments.find((dep) => dep.id === employee.departmentId)?.name)}</td>
-                    <td className="px-3 py-3">{displayValue(employee.status)}</td>
+                  <tr key={employee.id} className="border-b border-slate-800/70 hover:bg-slate-800/30 transition-colors">
+                    <td className="px-3 py-3 font-medium text-slate-200">
+                      <div>{displayValue(employee.anarana ?? `${employee.prenom ?? ''} ${employee.nom ?? ''}`.trim())}</div>
+                      <div className="text-xs text-slate-500 font-mono">{employee.matricule || employee.id}</div>
+                    </td>
+                    <td className="px-3 py-3 text-slate-300">{displayValue(positions.find((position) => position.id === employee.positionId)?.name)}</td>
+                    <td className="px-3 py-3 text-slate-300">{displayValue(departments.find((dep) => dep.id === employee.departmentId)?.name)}</td>
+                    <td className="px-3 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        employee.status === 'Inactive' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      }`}>
+                        {employee.status || 'Active'}
+                      </span>
+                    </td>
                     <td className="px-3 py-3">
                       <div className="flex gap-2">
-                        <Link className="rounded bg-cyan-500/20 px-2 py-1 text-cyan-300" to={`/employees/${employee.id}`}>Détail</Link>
-                        <button className="rounded bg-cyan-500/20 px-2 py-1 text-cyan-300" onClick={() => {
+                        <Link className="rounded bg-slate-800 hover:bg-slate-700 px-2.5 py-1 text-slate-300 transition-colors" to={`/employees/${employee.id}`}>Détail</Link>
+                        <button className="rounded bg-cyan-500/20 hover:bg-cyan-500/30 px-2.5 py-1 text-cyan-300 transition-colors cursor-pointer" onClick={() => {
                           setSelectedEmployee(employee)
+                          const validStatus: 'Active' | 'Inactive' =
+                            String(employee.status || '').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
                           setForm({
                             employeeId: employee.employeeId ?? employee.id,
                             matricule: employee.matricule ?? '',
-                            anarana: employee.anarana ?? '',
+                            anarana: employee.anarana ?? `${employee.prenom ?? ''} ${employee.nom ?? ''}`.trim(),
                             cin: employee.cin ?? '',
-                            telephone: employee.telephone,
+                            telephone: employee.telephone ?? '',
                             email: employee.email ?? '',
-                            departmentId: employee.departmentId,
-                            positionId: employee.positionId,
-                            salaryBase: employee.salaryBase,
-                            status: employee.status,
-                            isMember: employee.isMember,
+                            departmentId: employee.departmentId ?? '',
+                            positionId: employee.positionId ?? '',
+                            salaryBase: Number(employee.salaryBase || 0),
+                            status: validStatus,
+                            isMember: Boolean(employee.isMember),
                             memberId: employee.memberId ?? '',
                             province: employee.province ?? '',
                             region: employee.region ?? '',
@@ -326,7 +353,7 @@ export const EmployeesPage = () => {
                           })
                           setFeedback(null)
                         }}>Modifier</button>
-                        <button className="rounded bg-rose-500/20 px-2 py-1 text-rose-300" onClick={() => void handleDelete(employee.id)}>Supprimer</button>
+                        <button className="rounded bg-rose-500/20 hover:bg-rose-500/30 px-2.5 py-1 text-rose-300 transition-colors cursor-pointer" onClick={() => void handleDelete(employee.id)}>Supprimer</button>
                       </div>
                     </td>
                   </tr>
@@ -336,112 +363,192 @@ export const EmployeesPage = () => {
           </div>
         </div>
 
-        <form className="rounded-2xl border border-slate-800 bg-slate-900 p-5" onSubmit={handleSubmit}>
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-xl font-semibold">{selectedEmployee ? 'Modifier employé' : 'Ajouter employé'}</h3>
-            {selectedEmployee ? <button className="rounded-lg border border-slate-700 px-3 py-2 text-sm" type="button" onClick={resetForm}>Nouveau</button> : null}
-          </div>
-          {feedback ? <p className="mt-3 rounded-lg border border-cyan-700/40 bg-cyan-500/10 px-3 py-2 text-sm text-cyan-300">{feedback}</p> : null}
-
-          <div className="mt-4 space-y-3 text-sm">
+        <form className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-4" onSubmit={handleSubmit}>
+          <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div>
+              <h3 className="text-xl font-semibold text-white">
+                {selectedEmployee ? 'Modifier employé' : 'Ajouter un employé'}
+              </h3>
+              {selectedEmployee && (
+                <p className="text-xs text-cyan-400 mt-0.5">
+                  ID: {selectedEmployee.id} • Matricule: {selectedEmployee.matricule || 'En cours'}
+                </p>
+              )}
+            </div>
             {selectedEmployee ? (
-              <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-                <p className="font-semibold text-slate-200">Informations d’identité</p>
-                <div className="mt-2 grid gap-2 text-slate-400">
-                  <p><span className="text-slate-500">ID RH :</span> {displayValue(selectedEmployee.id)}</p>
-                  <p><span className="text-slate-500">Matricule :</span> {displayValue(selectedEmployee.matricule)}</p>
-                  <p><span className="text-slate-500">Anarana :</span> {displayValue(selectedEmployee.anarana)}</p>
-                  <p><span className="text-slate-500">CIN :</span> {displayValue(selectedEmployee.cin)}</p>
-                  <p><span className="text-slate-500">Date naissance :</span> {displayValue(selectedEmployee.date_naissance)}</p>
-                  <p><span className="text-slate-500">Adresse :</span> {displayValue(`${selectedEmployee.province ?? ''} ${selectedEmployee.region ?? ''} ${selectedEmployee.district ?? ''} ${selectedEmployee.commune ?? ''} ${selectedEmployee.fokontany ?? ''}`.trim())}</p>
-                  <p><span className="text-slate-500">Téléphone :</span> {displayValue(selectedEmployee.telephone)}</p>
+              <button className="rounded-lg border border-slate-700 hover:bg-slate-800 px-3 py-1.5 text-xs text-slate-300 transition-colors cursor-pointer" type="button" onClick={resetForm}>
+                + Nouvel employé
+              </button>
+            ) : null}
+          </div>
+
+          {feedback ? (
+            <p className={`rounded-lg px-3 py-2 text-sm ${
+              feedback.includes('succès') || feedback.includes('mis à jour')
+                ? 'border border-emerald-700/40 bg-emerald-500/10 text-emerald-300'
+                : 'border border-rose-700/40 bg-rose-500/10 text-rose-300'
+            }`}>
+              {feedback}
+            </p>
+          ) : null}
+
+          <div className="space-y-4 text-sm">
+            {/* Section 1: Identité */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+              <p className="font-semibold text-slate-200 text-xs uppercase tracking-wider text-cyan-400">1. Identité & Coordonnées</p>
+              
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Nom complet (Anarana) *</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="Nom et prénom" value={form.anarana} onChange={(event) => handleChange('anarana', event.target.value)} required />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Numéro CIN (12 chiffres)</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="Ex: 101234567890" value={form.cin} onChange={(event) => handleChange('cin', event.target.value)} />
                 </div>
               </div>
-            ) : (
-              <>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="ID RH" value={form.employeeId} onChange={(event) => handleChange('employeeId', event.target.value)} required />
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Matricule" value={form.matricule} onChange={(event) => handleChange('matricule', event.target.value)} />
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Anarana" value={form.anarana} onChange={(event) => handleChange('anarana', event.target.value)} required />
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="CIN" value={form.cin} onChange={(event) => handleChange('cin', event.target.value)} required />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Téléphone" value={form.telephone} onChange={(event) => handleChange('telephone', event.target.value)} required />
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Email" value={form.email} onChange={(event) => handleChange('email', event.target.value)} />
-                </div>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Date naissance" value={form.dateNaissance} onChange={(event) => handleChange('dateNaissance', event.target.value)} />
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Email notification" value={form.emailNotification} onChange={(event) => handleChange('emailNotification', event.target.value)} />
-                <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.genre} onChange={(event) => handleChange('genre', event.target.value)}>
-                  <option value="LAHY">Lahy</option>
-                  <option value="VAVY">Vavy</option>
-                </select>
-              </>
-            )}
 
-            <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-              <p className="mb-2 text-sm text-slate-400">Données RH</p>
-              <div className="space-y-3">
-                <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.departmentId} onChange={(event) => handleChange('departmentId', event.target.value)} required>
-                  <option value="">Sélectionner un département</option>
-                  {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
-                </select>
-                <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.positionId} onChange={(event) => handleChange('positionId', event.target.value)} required>
-                  <option value="">Sélectionner un poste</option>
-                  {positions.map((position) => <option key={position.id} value={position.id}>{position.name}</option>)}
-                </select>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" placeholder="Salaire de base" type="number" value={form.salaryBase} onChange={(event) => handleChange('salaryBase', event.target.value)} required />
-                <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.status} onChange={(event) => handleChange('status', event.target.value)}>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-                <label className="flex items-center gap-2 text-slate-300"><input type="checkbox" checked={form.isMember} onChange={(event) => setForm({ ...form, isMember: event.target.checked, memberId: event.target.checked ? form.memberId : '' })} /> Est membre</label>
-                <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.memberId} onChange={(event) => setForm({ ...form, memberId: event.target.value })} disabled={!form.isMember}>
-                  <option value="">Sélectionner un membre</option>
-                  {members.map((member) => <option key={member.id} value={member.id}>{member.anarana ?? ((`${member.prenom ?? ''} ${member.nom ?? ''}`.trim() || member.id))}</option>)}
-                </select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Téléphone *</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="+261 34 00 000 00" value={form.telephone} onChange={(event) => handleChange('telephone', event.target.value)} required />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Email</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="email@exemple.mg" type="email" value={form.email} onChange={(event) => handleChange('email', event.target.value)} />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Date de naissance</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" type="date" value={form.dateNaissance} onChange={(event) => handleChange('dateNaissance', event.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Genre</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.genre} onChange={(event) => handleChange('genre', event.target.value)}>
+                    <option value="LAHY">Lahy (Homme)</option>
+                    <option value="VAVY">Vavy (Femme)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Email notification</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="Notification" value={form.emailNotification} onChange={(event) => handleChange('emailNotification', event.target.value)} />
+                </div>
               </div>
             </div>
 
-            {!selectedEmployee ? (
-              <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                <p className="mb-2 text-sm text-slate-400">Localisation</p>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.province} onChange={(event) => handleChange('province', event.target.value)}>
+            {/* Section 2: Données RH & Affectation */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+              <p className="font-semibold text-slate-200 text-xs uppercase tracking-wider text-cyan-400">2. Affectation & Données RH</p>
+              
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Département *</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.departmentId} onChange={(event) => handleChange('departmentId', event.target.value)} required>
+                    <option value="">Sélectionner un département</option>
+                    {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Poste *</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.positionId} onChange={(event) => handleChange('positionId', event.target.value)} required>
+                    <option value="">Sélectionner un poste</option>
+                    {positions.map((position) => <option key={position.id} value={position.id}>{position.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Salaire de base (MGA) *</label>
+                  <input className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="Salaire de base" type="number" min="0" value={form.salaryBase} onChange={(event) => handleChange('salaryBase', event.target.value)} required />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Statut de l'employé *</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.status} onChange={(event) => handleChange('status', event.target.value)}>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800">
+                <label className="flex items-center gap-2 text-slate-300 text-xs font-medium cursor-pointer">
+                  <input type="checkbox" checked={form.isMember} onChange={(event) => setForm({ ...form, isMember: event.target.checked, memberId: event.target.checked ? form.memberId : '' })} />
+                  Cet employé est également membre de l'Association AMM
+                </label>
+                {form.isMember && (
+                  <select className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 text-xs" value={form.memberId} onChange={(event) => setForm({ ...form, memberId: event.target.value })}>
+                    <option value="">Associer à la fiche d'un membre</option>
+                    {members.map((member) => <option key={member.id} value={member.id}>{member.anarana ?? ((`${member.prenom ?? ''} ${member.nom ?? ''}`.trim() || member.id))}</option>)}
+                  </select>
+                )}
+              </div>
+            </div>
+
+            {/* Section 3: Localisation */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+              <p className="font-semibold text-slate-200 text-xs uppercase tracking-wider text-cyan-400">3. Localisation Géographique</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Province</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.province} onChange={(event) => handleChange('province', event.target.value)}>
                     <option value="">Province</option>
                     {provinceOptions.map((province) => <option key={province} value={province}>{province}</option>)}
                   </select>
-                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.region} onChange={(event) => handleChange('region', event.target.value)} disabled={!form.province}>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Région</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.region} onChange={(event) => handleChange('region', event.target.value)} disabled={!form.province}>
                     <option value="">Région</option>
                     {regionOptions.map((region) => <option key={region} value={region}>{region}</option>)}
                   </select>
-                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.district} onChange={(event) => handleChange('district', event.target.value)} disabled={!form.region}>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">District</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.district} onChange={(event) => handleChange('district', event.target.value)} disabled={!form.region}>
                     <option value="">District</option>
                     {districtOptions.map((district) => <option key={district} value={district}>{district}</option>)}
                   </select>
-                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.commune} onChange={(event) => handleChange('commune', event.target.value)} disabled={!form.district}>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-1 block">Commune</label>
+                  <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.commune} onChange={(event) => handleChange('commune', event.target.value)} disabled={!form.district}>
                     <option value="">Commune</option>
                     {communeOptions.map((commune) => <option key={commune} value={commune}>{commune}</option>)}
                   </select>
                 </div>
-                <select className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" value={form.fokontany} onChange={(event) => handleChange('fokontany', event.target.value)} disabled={!form.commune}>
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Fokontany</label>
+                <select className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" value={form.fokontany} onChange={(event) => handleChange('fokontany', event.target.value)} disabled={!form.commune}>
                   <option value="">Fokontany</option>
                   {tokenizedCommune.map((entry) => <option key={entry} value={entry}>{entry}</option>)}
                 </select>
               </div>
-            ) : null}
-
-            <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm">
-              <p className="font-semibold text-slate-200">Compte financier</p>
-              <div className="mt-2 grid gap-2 sm:grid-cols-3 text-slate-400">
-                <div><p>Solde</p><p className="text-cyan-300">{account?.solde ?? 0}</p></div>
-                <div><p>Crédit</p><p className="text-emerald-300">{account?.solde_credit ?? 0}</p></div>
-                <div><p>Débit</p><p className="text-rose-300">{account?.solde_debit ?? 0}</p></div>
-              </div>
             </div>
+
+            {/* Section 4: Compte Financier */}
+            {selectedEmployee && (
+              <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-xs">
+                <p className="font-semibold text-slate-200">Compte financier rattaché ({selectedEmployee.matricule})</p>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800"><p className="text-slate-400">Solde</p><p className="text-cyan-300 font-bold">{account?.solde ?? 0} MGA</p></div>
+                  <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800"><p className="text-slate-400">Crédit</p><p className="text-emerald-300 font-bold">{account?.solde_credit ?? 0} MGA</p></div>
+                  <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800"><p className="text-slate-400">Débit</p><p className="text-rose-300 font-bold">{account?.solde_debit ?? 0} MGA</p></div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="mt-5 flex gap-3">
-            <button className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950" type="submit">{selectedEmployee ? 'Mettre à jour' : 'Enregistrer'}</button>
-            <button className="rounded-lg border border-slate-700 px-4 py-2" type="button" onClick={resetForm}>Annuler</button>
+
+          <div className="mt-5 flex gap-3 pt-2">
+            <button className="flex-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 px-4 py-2.5 font-semibold text-slate-950 transition-colors cursor-pointer" type="submit">
+              {selectedEmployee ? 'Mettre à jour les informations' : 'Enregistrer le nouvel employé'}
+            </button>
+            <button className="rounded-lg border border-slate-700 hover:bg-slate-800 px-4 py-2.5 text-slate-300 transition-colors cursor-pointer" type="button" onClick={resetForm}>
+              Annuler
+            </button>
           </div>
         </form>
       </div>

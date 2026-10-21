@@ -8,6 +8,8 @@ import RHAppModule from './RH/RHAppModule'; // Ilay natao tamin'ny Dingana 1
 import LogModuleApp from './gestion_logistique/LogModuleApp'; 
 import AccountModuleApp from './Mon_compte/AccountModuleApp'; 
 import ComptabiliteModuleApp from './comptabilite/ComptabiliteModuleApp'; 
+import OperationsAppModule from './operations/OperationsAppModule';
+import SiteSettingsModule from './settings/SiteSettingsModule';
 // Ampidiro miaraka amin'ny anarana samihafa izy ireo:
 import { AuthProvider as RHAuthProvider } from './RH/contexts/AuthContext';
 import { AuthProvider as CongeAuthProvider } from './conge/context/AuthContext';
@@ -173,27 +175,48 @@ export default function App() {
           );
         }
 
-        // 1. Raha misy module voafidy
-        if (activeModule === 'members' || activeModule === 'adhesion' || activeModule === 'operations' || activeModule === 'settings') {
-          const tabMapping: Record<string, string> = {
-            members: 'members',
-            adhesion: 'adhesion',
-            operations: 'operations',
-            settings: 'parametre'
-          };
+        // 1. Module dédié : Gestion des Opérations & Caisse
+        if (activeModule === 'operations') {
+          return (
+            <OperationsAppModule
+              onBackToDashboard={() => {
+                setActiveModule(null);
+                setCurrentTab('overview');
+              }}
+            />
+          );
+        }
+
+        // 2. Module dédié : Paramètres Généraux du Site
+        if (activeModule === 'settings') {
+          return (
+            <SiteSettingsModule
+              onBackToDashboard={() => {
+                setActiveModule(null);
+                setCurrentTab('overview');
+              }}
+            />
+          );
+        }
+
+        // 3. Module dédié : Gestion des Membres & Adhésion
+        if (activeModule === 'members' || activeModule === 'adhesion') {
           return (
             <BrowserRouter>
               <RHAuthProvider>
                 <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100 flex items-center justify-between">
                     <button
                       onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
                       className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                     >
                       ← Retour au Menu Principal du Site
                     </button>
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      Module : Gestion des Membres
+                    </span>
                   </div>
-                  <MembersAppModule initialTab={tabMapping[activeModule] || 'overview'} />
+                  <MembersAppModule initialTab={activeModule === 'adhesion' ? 'adhesion' : 'members'} />
                 </div>
               </RHAuthProvider>
             </BrowserRouter>
@@ -205,13 +228,16 @@ export default function App() {
             <BrowserRouter>
               <RHAuthProvider>
                 <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100 flex items-center justify-between">
                     <button
                       onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
                       className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                     >
                       ← Retour au Menu Principal du Site
                     </button>
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      Module : Ressources Humaines & Paie
+                    </span>
                   </div>
                   <RHAppModule initialRoute={activeModule === 'payroll' ? '/payroll' : '/'} />
                 </div>
@@ -224,13 +250,16 @@ export default function App() {
           return (
             <BrowserRouter>
               <div className="w-full">
-                <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100 flex items-center justify-between">
                   <button
                     onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
                     className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                   >
                     ← Retour au Menu Principal du Site
                   </button>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Module : Gestion des Congés & Absences
+                  </span>
                 </div>
                 <Moduleconge />
               </div>
@@ -243,13 +272,16 @@ export default function App() {
             <BrowserRouter>
               <LogAuthProvider>
                 <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100 flex items-center justify-between">
                     <button
                       onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
                       className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                     >
                       ← Retour au Menu Principal du Site
                     </button>
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      Module : Gestion de la Logistique & Stocks
+                    </span>
                   </div>
                   <LogModuleApp />
                 </div>
@@ -261,17 +293,20 @@ export default function App() {
         if (activeModule === 'account') {
           return (
             <BrowserRouter>
-                <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
-                    <button
-                      onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
-                      className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
-                    >
-                      ← Retour au Menu Principal du Site
-                    </button>
-                  </div>
-                  <AccountModuleApp />
+              <div className="w-full">
+                <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100 flex items-center justify-between">
+                  <button
+                    onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
+                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
+                  >
+                    ← Retour au Menu Principal du Site
+                  </button>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    Module : Mon Compte & Profil
+                  </span>
                 </div>
+                <AccountModuleApp />
+              </div>
             </BrowserRouter>
           );
         }
@@ -281,13 +316,16 @@ export default function App() {
             <BrowserRouter>
               <CptAuthProvider>
                 <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100">
+                  <div className="max-w-7xl mx-auto px-6 pt-4 bg-slate-100 flex items-center justify-between">
                     <button
                       onClick={() => { setActiveModule(null); setCurrentTab('overview'); }}
                       className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                     >
                       ← Retour au Menu Principal du Site
                     </button>
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      Module : Comptabilité Générale
+                    </span>
                   </div>
                   <ComptabiliteModuleApp />
                 </div>

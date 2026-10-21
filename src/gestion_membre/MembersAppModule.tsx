@@ -525,39 +525,47 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
       return;
     }
 
-    const uniqueId = isEditMode && selectedEditId 
-      ? selectedEditId 
+    const existingMember = isEditMode && selectedEditId 
+      ? allMembers.find(m => m.id === selectedEditId) 
+      : null;
+
+    const uniqueId = existingMember 
+      ? existingMember.id 
       : "ID-" + Math.floor(1000 + Math.random() * 9000);
 
-    const matriculeCode = isEditMode && selectedEditId 
-      ? allMembers.find(m => m.id === selectedEditId)?.matricule || "" 
+    const matriculeCode = existingMember 
+      ? existingMember.matricule 
       : (PROJECT_PREFIX[formTetikasa] || "AMM") + "-" + Math.floor(10000 + Math.random() * 90000);
 
     const updatedMember: Member = {
+      ...(existingMember || {}),
       id: uniqueId,
       matricule: matriculeCode,
       anarana: formAnarana.trim().toUpperCase(),
       cin: formCin.trim(),
-      cin_recto: formCinRecto || undefined,
-      cin_verso: formCinVerso || undefined,
-      commune: selectedCom || undefined,
+      cin_recto: formCinRecto || existingMember?.cin_recto || undefined,
+      cin_verso: formCinVerso || existingMember?.cin_verso || undefined,
+      commune: selectedCom || existingMember?.commune || undefined,
       date_adhesion: formDateAdhesion,
-      date_delivrance: formDateDelivrance || undefined,
-      date_duplicata: formDateDuplicata || undefined,
-      date_naissance: formDateNaissance || undefined,
-      district: selectedDist || undefined,
-      fokontany: selectedFok || undefined,
-      genre: formGenre || undefined,
-      lieu_delivrance: formLieuDelivrance || undefined,
-      lieu_duplicata: formLieuDuplicata || undefined,
-      lieu_naissance: formLieuNaissance || undefined,
-      photo: formPhoto || undefined,
-      province: selectedProv || undefined,
-      region: selectedReg || undefined,
-      telephone: formTelephone.trim() || undefined,
-      tetikasa: formTetikasa,
-      email_notification: formEmailNotification.trim() || undefined,
-      submitted_at: new Date().toISOString()
+      date_delivrance: formDateDelivrance || existingMember?.date_delivrance || undefined,
+      date_duplicata: formDateDuplicata || existingMember?.date_duplicata || undefined,
+      date_naissance: formDateNaissance || existingMember?.date_naissance || undefined,
+      district: selectedDist || existingMember?.district || undefined,
+      fokontany: selectedFok || existingMember?.fokontany || undefined,
+      genre: formGenre || existingMember?.genre || undefined,
+      lieu_delivrance: formLieuDelivrance || existingMember?.lieu_delivrance || undefined,
+      lieu_duplicata: formLieuDuplicata || existingMember?.lieu_duplicata || undefined,
+      lieu_naissance: formLieuNaissance || existingMember?.lieu_naissance || undefined,
+      photo: formPhoto || existingMember?.photo || undefined,
+      province: selectedProv || existingMember?.province || undefined,
+      region: selectedReg || existingMember?.region || undefined,
+      telephone: formTelephone.trim() || existingMember?.telephone || undefined,
+      tetikasa: formTetikasa || existingMember?.tetikasa || "AVOTRA MALAGASY",
+      email_notification: formEmailNotification.trim() || existingMember?.email_notification || undefined,
+      solde: existingMember?.solde ?? 0,
+      solde_credit: existingMember?.solde_credit ?? 0,
+      solde_debit: existingMember?.solde_debit ?? 0,
+      submitted_at: existingMember?.submitted_at || new Date().toISOString()
     };
 
     try {
@@ -582,6 +590,7 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
 
   const handleDeleteMember = async (member: Member) => {
     if (!member.id) return;
+    if (!window.confirm(`⚠️ Tena hofafana tokoa ve ny mpikambana ${member.anarana} (${member.matricule}) ?`)) return;
     try {
       setIsAppLoading(true);
       await FirebaseService.deleteMember(member.id);
@@ -605,6 +614,8 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     setSelectedEditId(member.id);
     setFormAnarana(member.anarana || "");
     setFormCin(member.cin || "");
+    setFormCinRecto(member.cin_recto || "");
+    setFormCinVerso(member.cin_verso || "");
     setFormGenre(member.genre || "");
     setFormTelephone(member.telephone || "");
     setFormTetikasa(member.tetikasa || "AVOTRA MALAGASY");
@@ -633,6 +644,8 @@ export default function MembersAppModule({ initialTab }: { initialTab?: string }
     setSelectedEditId("");
     setFormAnarana("");
     setFormCin("");
+    setFormCinRecto("");
+    setFormCinVerso("");
     setFormGenre("");
     setFormTelephone("");
     setFormTetikasa("AVOTRA MALAGASY");

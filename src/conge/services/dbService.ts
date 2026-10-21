@@ -36,11 +36,13 @@ export async function createAuditLog(actorId: string, actorName: string, action:
   }
 }
 
+const isValidKey = (k: string) => typeof k === 'string' && k.trim().length > 0 && !/[.#$\[\]/]/.test(k);
+
 /**
  * USER PROFILES
  */
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
-  if (!database) return null;
+  if (!database || !isValidKey(uid)) return null;
   try {
     const snap = await get(ref(database, `${COLS.USERS}/${uid}`));
     if (snap.exists()) {
@@ -54,7 +56,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 }
 
 export async function saveUserProfile(profile: UserProfile): Promise<void> {
-  if (!database) return;
+  if (!database || !profile?.uid || !isValidKey(profile.uid)) return;
   await update(ref(database, `${COLS.USERS}/${profile.uid}`), profile as any);
 }
 
@@ -75,7 +77,8 @@ export async function getAllUsers(): Promise<UserProfile[]> {
  * LEAVE BALANCES
  */
 export async function getUserBalance(userId: string, year: number = CURRENT_YEAR): Promise<LeaveBalance> {
-  const balanceId = `${userId}_${year}`;
+  const safeUserId = userId ? userId.replace(/[.#$\[\]]/g, '_') : 'default';
+  const balanceId = `${safeUserId}_${year}`;
   if (!database) return createDefaultBalance(userId);
   try {
     const snap = await get(ref(database, `${COLS.BALANCES}/${balanceId}`));
